@@ -1,0 +1,1013 @@
+Resources:
+  AdminRole38563C57:
+    Type: 'AWS::IAM::Role'
+    Properties:
+      AssumeRolePolicyDocument:
+        Statement:
+          - Action: 'sts:AssumeRole'
+            Effect: Allow
+            Principal:
+              AWS: !Join 
+                - ''
+                - - 'arn:'
+                  - !Ref 'AWS::Partition'
+                  - ':iam::177340731096:root'
+        Version: 2012-10-17
+    Metadata:
+      'aws:cdk:path': ClusterStack-us-east-1/AdminRole/Resource
+  demoeksclusterDefaultVpc07F17AD1:
+    Type: 'AWS::EC2::VPC'
+    Properties:
+      CidrBlock: 10.0.0.0/16
+      EnableDnsHostnames: true
+      EnableDnsSupport: true
+      InstanceTenancy: default
+      Tags:
+        - Key: Name
+          Value: ClusterStack-us-east-1/demoeks--cluster/DefaultVpc
+    Metadata:
+      'aws:cdk:path': ClusterStack-us-east-1/demoeks--cluster/DefaultVpc/Resource
+  demoeksclusterDefaultVpcPublicSubnet1Subnet80D0BD59:
+    Type: 'AWS::EC2::Subnet'
+    Properties:
+      VpcId: !Ref demoeksclusterDefaultVpc07F17AD1
+      AvailabilityZone: us-east-1a
+      CidrBlock: 10.0.0.0/19
+      MapPublicIpOnLaunch: true
+      Tags:
+        - Key: 'aws-cdk:subnet-name'
+          Value: Public
+        - Key: 'aws-cdk:subnet-type'
+          Value: Public
+        - Key: kubernetes.io/role/elb
+          Value: '1'
+        - Key: Name
+          Value: ClusterStack-us-east-1/demoeks--cluster/DefaultVpc/PublicSubnet1
+    Metadata:
+      'aws:cdk:path': ClusterStack-us-east-1/demoeks--cluster/DefaultVpc/PublicSubnet1/Subnet
+  demoeksclusterDefaultVpcPublicSubnet1RouteTable1C0622A7:
+    Type: 'AWS::EC2::RouteTable'
+    Properties:
+      VpcId: !Ref demoeksclusterDefaultVpc07F17AD1
+      Tags:
+        - Key: kubernetes.io/role/elb
+          Value: '1'
+        - Key: Name
+          Value: ClusterStack-us-east-1/demoeks--cluster/DefaultVpc/PublicSubnet1
+    Metadata:
+      'aws:cdk:path': >-
+        ClusterStack-us-east-1/demoeks--cluster/DefaultVpc/PublicSubnet1/RouteTable
+  demoeksclusterDefaultVpcPublicSubnet1RouteTableAssociationA1C160D8:
+    Type: 'AWS::EC2::SubnetRouteTableAssociation'
+    Properties:
+      RouteTableId: !Ref demoeksclusterDefaultVpcPublicSubnet1RouteTable1C0622A7
+      SubnetId: !Ref demoeksclusterDefaultVpcPublicSubnet1Subnet80D0BD59
+    Metadata:
+      'aws:cdk:path': >-
+        ClusterStack-us-east-1/demoeks--cluster/DefaultVpc/PublicSubnet1/RouteTableAssociation
+  demoeksclusterDefaultVpcPublicSubnet1DefaultRoute1CE82014:
+    Type: 'AWS::EC2::Route'
+    Properties:
+      RouteTableId: !Ref demoeksclusterDefaultVpcPublicSubnet1RouteTable1C0622A7
+      DestinationCidrBlock: 0.0.0.0/0
+      GatewayId: !Ref demoeksclusterDefaultVpcIGW583CB09E
+    DependsOn:
+      - demoeksclusterDefaultVpcVPCGWCB409015
+    Metadata:
+      'aws:cdk:path': >-
+        ClusterStack-us-east-1/demoeks--cluster/DefaultVpc/PublicSubnet1/DefaultRoute
+  demoeksclusterDefaultVpcPublicSubnet1EIP39A1D3AC:
+    Type: 'AWS::EC2::EIP'
+    Properties:
+      Domain: vpc
+      Tags:
+        - Key: kubernetes.io/role/elb
+          Value: '1'
+        - Key: Name
+          Value: ClusterStack-us-east-1/demoeks--cluster/DefaultVpc/PublicSubnet1
+    Metadata:
+      'aws:cdk:path': ClusterStack-us-east-1/demoeks--cluster/DefaultVpc/PublicSubnet1/EIP
+  demoeksclusterDefaultVpcPublicSubnet1NATGateway82C7E961:
+    Type: 'AWS::EC2::NatGateway'
+    Properties:
+      SubnetId: !Ref demoeksclusterDefaultVpcPublicSubnet1Subnet80D0BD59
+      AllocationId: !GetAtt 
+        - demoeksclusterDefaultVpcPublicSubnet1EIP39A1D3AC
+        - AllocationId
+      Tags:
+        - Key: kubernetes.io/role/elb
+          Value: '1'
+        - Key: Name
+          Value: ClusterStack-us-east-1/demoeks--cluster/DefaultVpc/PublicSubnet1
+    Metadata:
+      'aws:cdk:path': >-
+        ClusterStack-us-east-1/demoeks--cluster/DefaultVpc/PublicSubnet1/NATGateway
+  demoeksclusterDefaultVpcPublicSubnet2SubnetD4D57D44:
+    Type: 'AWS::EC2::Subnet'
+    Properties:
+      VpcId: !Ref demoeksclusterDefaultVpc07F17AD1
+      AvailabilityZone: us-east-1b
+      CidrBlock: 10.0.32.0/19
+      MapPublicIpOnLaunch: true
+      Tags:
+        - Key: 'aws-cdk:subnet-name'
+          Value: Public
+        - Key: 'aws-cdk:subnet-type'
+          Value: Public
+        - Key: kubernetes.io/role/elb
+          Value: '1'
+        - Key: Name
+          Value: ClusterStack-us-east-1/demoeks--cluster/DefaultVpc/PublicSubnet2
+    Metadata:
+      'aws:cdk:path': ClusterStack-us-east-1/demoeks--cluster/DefaultVpc/PublicSubnet2/Subnet
+  demoeksclusterDefaultVpcPublicSubnet2RouteTable8AD56BBD:
+    Type: 'AWS::EC2::RouteTable'
+    Properties:
+      VpcId: !Ref demoeksclusterDefaultVpc07F17AD1
+      Tags:
+        - Key: kubernetes.io/role/elb
+          Value: '1'
+        - Key: Name
+          Value: ClusterStack-us-east-1/demoeks--cluster/DefaultVpc/PublicSubnet2
+    Metadata:
+      'aws:cdk:path': >-
+        ClusterStack-us-east-1/demoeks--cluster/DefaultVpc/PublicSubnet2/RouteTable
+  demoeksclusterDefaultVpcPublicSubnet2RouteTableAssociation773C86A6:
+    Type: 'AWS::EC2::SubnetRouteTableAssociation'
+    Properties:
+      RouteTableId: !Ref demoeksclusterDefaultVpcPublicSubnet2RouteTable8AD56BBD
+      SubnetId: !Ref demoeksclusterDefaultVpcPublicSubnet2SubnetD4D57D44
+    Metadata:
+      'aws:cdk:path': >-
+        ClusterStack-us-east-1/demoeks--cluster/DefaultVpc/PublicSubnet2/RouteTableAssociation
+  demoeksclusterDefaultVpcPublicSubnet2DefaultRoute2B38DDD2:
+    Type: 'AWS::EC2::Route'
+    Properties:
+      RouteTableId: !Ref demoeksclusterDefaultVpcPublicSubnet2RouteTable8AD56BBD
+      DestinationCidrBlock: 0.0.0.0/0
+      GatewayId: !Ref demoeksclusterDefaultVpcIGW583CB09E
+    DependsOn:
+      - demoeksclusterDefaultVpcVPCGWCB409015
+    Metadata:
+      'aws:cdk:path': >-
+        ClusterStack-us-east-1/demoeks--cluster/DefaultVpc/PublicSubnet2/DefaultRoute
+  demoeksclusterDefaultVpcPublicSubnet2EIP202916A9:
+    Type: 'AWS::EC2::EIP'
+    Properties:
+      Domain: vpc
+      Tags:
+        - Key: kubernetes.io/role/elb
+          Value: '1'
+        - Key: Name
+          Value: ClusterStack-us-east-1/demoeks--cluster/DefaultVpc/PublicSubnet2
+    Metadata:
+      'aws:cdk:path': ClusterStack-us-east-1/demoeks--cluster/DefaultVpc/PublicSubnet2/EIP
+  demoeksclusterDefaultVpcPublicSubnet2NATGateway610C00A7:
+    Type: 'AWS::EC2::NatGateway'
+    Properties:
+      SubnetId: !Ref demoeksclusterDefaultVpcPublicSubnet2SubnetD4D57D44
+      AllocationId: !GetAtt 
+        - demoeksclusterDefaultVpcPublicSubnet2EIP202916A9
+        - AllocationId
+      Tags:
+        - Key: kubernetes.io/role/elb
+          Value: '1'
+        - Key: Name
+          Value: ClusterStack-us-east-1/demoeks--cluster/DefaultVpc/PublicSubnet2
+    Metadata:
+      'aws:cdk:path': >-
+        ClusterStack-us-east-1/demoeks--cluster/DefaultVpc/PublicSubnet2/NATGateway
+  demoeksclusterDefaultVpcPublicSubnet3Subnet2AC6CD39:
+    Type: 'AWS::EC2::Subnet'
+    Properties:
+      VpcId: !Ref demoeksclusterDefaultVpc07F17AD1
+      AvailabilityZone: us-east-1c
+      CidrBlock: 10.0.64.0/19
+      MapPublicIpOnLaunch: true
+      Tags:
+        - Key: 'aws-cdk:subnet-name'
+          Value: Public
+        - Key: 'aws-cdk:subnet-type'
+          Value: Public
+        - Key: kubernetes.io/role/elb
+          Value: '1'
+        - Key: Name
+          Value: ClusterStack-us-east-1/demoeks--cluster/DefaultVpc/PublicSubnet3
+    Metadata:
+      'aws:cdk:path': ClusterStack-us-east-1/demoeks--cluster/DefaultVpc/PublicSubnet3/Subnet
+  demoeksclusterDefaultVpcPublicSubnet3RouteTable90AB595F:
+    Type: 'AWS::EC2::RouteTable'
+    Properties:
+      VpcId: !Ref demoeksclusterDefaultVpc07F17AD1
+      Tags:
+        - Key: kubernetes.io/role/elb
+          Value: '1'
+        - Key: Name
+          Value: ClusterStack-us-east-1/demoeks--cluster/DefaultVpc/PublicSubnet3
+    Metadata:
+      'aws:cdk:path': >-
+        ClusterStack-us-east-1/demoeks--cluster/DefaultVpc/PublicSubnet3/RouteTable
+  demoeksclusterDefaultVpcPublicSubnet3RouteTableAssociation229D4831:
+    Type: 'AWS::EC2::SubnetRouteTableAssociation'
+    Properties:
+      RouteTableId: !Ref demoeksclusterDefaultVpcPublicSubnet3RouteTable90AB595F
+      SubnetId: !Ref demoeksclusterDefaultVpcPublicSubnet3Subnet2AC6CD39
+    Metadata:
+      'aws:cdk:path': >-
+        ClusterStack-us-east-1/demoeks--cluster/DefaultVpc/PublicSubnet3/RouteTableAssociation
+  demoeksclusterDefaultVpcPublicSubnet3DefaultRouteE0595C6B:
+    Type: 'AWS::EC2::Route'
+    Properties:
+      RouteTableId: !Ref demoeksclusterDefaultVpcPublicSubnet3RouteTable90AB595F
+      DestinationCidrBlock: 0.0.0.0/0
+      GatewayId: !Ref demoeksclusterDefaultVpcIGW583CB09E
+    DependsOn:
+      - demoeksclusterDefaultVpcVPCGWCB409015
+    Metadata:
+      'aws:cdk:path': >-
+        ClusterStack-us-east-1/demoeks--cluster/DefaultVpc/PublicSubnet3/DefaultRoute
+  demoeksclusterDefaultVpcPublicSubnet3EIP61285534:
+    Type: 'AWS::EC2::EIP'
+    Properties:
+      Domain: vpc
+      Tags:
+        - Key: kubernetes.io/role/elb
+          Value: '1'
+        - Key: Name
+          Value: ClusterStack-us-east-1/demoeks--cluster/DefaultVpc/PublicSubnet3
+    Metadata:
+      'aws:cdk:path': ClusterStack-us-east-1/demoeks--cluster/DefaultVpc/PublicSubnet3/EIP
+  demoeksclusterDefaultVpcPublicSubnet3NATGatewayF86338D9:
+    Type: 'AWS::EC2::NatGateway'
+    Properties:
+      SubnetId: !Ref demoeksclusterDefaultVpcPublicSubnet3Subnet2AC6CD39
+      AllocationId: !GetAtt 
+        - demoeksclusterDefaultVpcPublicSubnet3EIP61285534
+        - AllocationId
+      Tags:
+        - Key: kubernetes.io/role/elb
+          Value: '1'
+        - Key: Name
+          Value: ClusterStack-us-east-1/demoeks--cluster/DefaultVpc/PublicSubnet3
+    Metadata:
+      'aws:cdk:path': >-
+        ClusterStack-us-east-1/demoeks--cluster/DefaultVpc/PublicSubnet3/NATGateway
+  demoeksclusterDefaultVpcPrivateSubnet1Subnet781368CC:
+    Type: 'AWS::EC2::Subnet'
+    Properties:
+      VpcId: !Ref demoeksclusterDefaultVpc07F17AD1
+      AvailabilityZone: us-east-1a
+      CidrBlock: 10.0.96.0/19
+      MapPublicIpOnLaunch: false
+      Tags:
+        - Key: 'aws-cdk:subnet-name'
+          Value: Private
+        - Key: 'aws-cdk:subnet-type'
+          Value: Private
+        - Key: kubernetes.io/role/internal-elb
+          Value: '1'
+        - Key: Name
+          Value: ClusterStack-us-east-1/demoeks--cluster/DefaultVpc/PrivateSubnet1
+    Metadata:
+      'aws:cdk:path': ClusterStack-us-east-1/demoeks--cluster/DefaultVpc/PrivateSubnet1/Subnet
+  demoeksclusterDefaultVpcPrivateSubnet1RouteTable3B8064CE:
+    Type: 'AWS::EC2::RouteTable'
+    Properties:
+      VpcId: !Ref demoeksclusterDefaultVpc07F17AD1
+      Tags:
+        - Key: kubernetes.io/role/internal-elb
+          Value: '1'
+        - Key: Name
+          Value: ClusterStack-us-east-1/demoeks--cluster/DefaultVpc/PrivateSubnet1
+    Metadata:
+      'aws:cdk:path': >-
+        ClusterStack-us-east-1/demoeks--cluster/DefaultVpc/PrivateSubnet1/RouteTable
+  demoeksclusterDefaultVpcPrivateSubnet1RouteTableAssociation141B5A7E:
+    Type: 'AWS::EC2::SubnetRouteTableAssociation'
+    Properties:
+      RouteTableId: !Ref demoeksclusterDefaultVpcPrivateSubnet1RouteTable3B8064CE
+      SubnetId: !Ref demoeksclusterDefaultVpcPrivateSubnet1Subnet781368CC
+    Metadata:
+      'aws:cdk:path': >-
+        ClusterStack-us-east-1/demoeks--cluster/DefaultVpc/PrivateSubnet1/RouteTableAssociation
+  demoeksclusterDefaultVpcPrivateSubnet1DefaultRouteB404B27E:
+    Type: 'AWS::EC2::Route'
+    Properties:
+      RouteTableId: !Ref demoeksclusterDefaultVpcPrivateSubnet1RouteTable3B8064CE
+      DestinationCidrBlock: 0.0.0.0/0
+      NatGatewayId: !Ref demoeksclusterDefaultVpcPublicSubnet1NATGateway82C7E961
+    Metadata:
+      'aws:cdk:path': >-
+        ClusterStack-us-east-1/demoeks--cluster/DefaultVpc/PrivateSubnet1/DefaultRoute
+  demoeksclusterDefaultVpcPrivateSubnet2Subnet9C0556E9:
+    Type: 'AWS::EC2::Subnet'
+    Properties:
+      VpcId: !Ref demoeksclusterDefaultVpc07F17AD1
+      AvailabilityZone: us-east-1b
+      CidrBlock: 10.0.128.0/19
+      MapPublicIpOnLaunch: false
+      Tags:
+        - Key: 'aws-cdk:subnet-name'
+          Value: Private
+        - Key: 'aws-cdk:subnet-type'
+          Value: Private
+        - Key: kubernetes.io/role/internal-elb
+          Value: '1'
+        - Key: Name
+          Value: ClusterStack-us-east-1/demoeks--cluster/DefaultVpc/PrivateSubnet2
+    Metadata:
+      'aws:cdk:path': ClusterStack-us-east-1/demoeks--cluster/DefaultVpc/PrivateSubnet2/Subnet
+  demoeksclusterDefaultVpcPrivateSubnet2RouteTableCF14740E:
+    Type: 'AWS::EC2::RouteTable'
+    Properties:
+      VpcId: !Ref demoeksclusterDefaultVpc07F17AD1
+      Tags:
+        - Key: kubernetes.io/role/internal-elb
+          Value: '1'
+        - Key: Name
+          Value: ClusterStack-us-east-1/demoeks--cluster/DefaultVpc/PrivateSubnet2
+    Metadata:
+      'aws:cdk:path': >-
+        ClusterStack-us-east-1/demoeks--cluster/DefaultVpc/PrivateSubnet2/RouteTable
+  demoeksclusterDefaultVpcPrivateSubnet2RouteTableAssociationF0AB752F:
+    Type: 'AWS::EC2::SubnetRouteTableAssociation'
+    Properties:
+      RouteTableId: !Ref demoeksclusterDefaultVpcPrivateSubnet2RouteTableCF14740E
+      SubnetId: !Ref demoeksclusterDefaultVpcPrivateSubnet2Subnet9C0556E9
+    Metadata:
+      'aws:cdk:path': >-
+        ClusterStack-us-east-1/demoeks--cluster/DefaultVpc/PrivateSubnet2/RouteTableAssociation
+  demoeksclusterDefaultVpcPrivateSubnet2DefaultRouteF0DB4CC7:
+    Type: 'AWS::EC2::Route'
+    Properties:
+      RouteTableId: !Ref demoeksclusterDefaultVpcPrivateSubnet2RouteTableCF14740E
+      DestinationCidrBlock: 0.0.0.0/0
+      NatGatewayId: !Ref demoeksclusterDefaultVpcPublicSubnet2NATGateway610C00A7
+    Metadata:
+      'aws:cdk:path': >-
+        ClusterStack-us-east-1/demoeks--cluster/DefaultVpc/PrivateSubnet2/DefaultRoute
+  demoeksclusterDefaultVpcPrivateSubnet3Subnet5F9A479C:
+    Type: 'AWS::EC2::Subnet'
+    Properties:
+      VpcId: !Ref demoeksclusterDefaultVpc07F17AD1
+      AvailabilityZone: us-east-1c
+      CidrBlock: 10.0.160.0/19
+      MapPublicIpOnLaunch: false
+      Tags:
+        - Key: 'aws-cdk:subnet-name'
+          Value: Private
+        - Key: 'aws-cdk:subnet-type'
+          Value: Private
+        - Key: kubernetes.io/role/internal-elb
+          Value: '1'
+        - Key: Name
+          Value: ClusterStack-us-east-1/demoeks--cluster/DefaultVpc/PrivateSubnet3
+    Metadata:
+      'aws:cdk:path': ClusterStack-us-east-1/demoeks--cluster/DefaultVpc/PrivateSubnet3/Subnet
+  demoeksclusterDefaultVpcPrivateSubnet3RouteTableC3AC4D54:
+    Type: 'AWS::EC2::RouteTable'
+    Properties:
+      VpcId: !Ref demoeksclusterDefaultVpc07F17AD1
+      Tags:
+        - Key: kubernetes.io/role/internal-elb
+          Value: '1'
+        - Key: Name
+          Value: ClusterStack-us-east-1/demoeks--cluster/DefaultVpc/PrivateSubnet3
+    Metadata:
+      'aws:cdk:path': >-
+        ClusterStack-us-east-1/demoeks--cluster/DefaultVpc/PrivateSubnet3/RouteTable
+  demoeksclusterDefaultVpcPrivateSubnet3RouteTableAssociationDF08ECE0:
+    Type: 'AWS::EC2::SubnetRouteTableAssociation'
+    Properties:
+      RouteTableId: !Ref demoeksclusterDefaultVpcPrivateSubnet3RouteTableC3AC4D54
+      SubnetId: !Ref demoeksclusterDefaultVpcPrivateSubnet3Subnet5F9A479C
+    Metadata:
+      'aws:cdk:path': >-
+        ClusterStack-us-east-1/demoeks--cluster/DefaultVpc/PrivateSubnet3/RouteTableAssociation
+  demoeksclusterDefaultVpcPrivateSubnet3DefaultRoute7631089B:
+    Type: 'AWS::EC2::Route'
+    Properties:
+      RouteTableId: !Ref demoeksclusterDefaultVpcPrivateSubnet3RouteTableC3AC4D54
+      DestinationCidrBlock: 0.0.0.0/0
+      NatGatewayId: !Ref demoeksclusterDefaultVpcPublicSubnet3NATGatewayF86338D9
+    Metadata:
+      'aws:cdk:path': >-
+        ClusterStack-us-east-1/demoeks--cluster/DefaultVpc/PrivateSubnet3/DefaultRoute
+  demoeksclusterDefaultVpcIGW583CB09E:
+    Type: 'AWS::EC2::InternetGateway'
+    Properties:
+      Tags:
+        - Key: Name
+          Value: ClusterStack-us-east-1/demoeks--cluster/DefaultVpc
+    Metadata:
+      'aws:cdk:path': ClusterStack-us-east-1/demoeks--cluster/DefaultVpc/IGW
+  demoeksclusterDefaultVpcVPCGWCB409015:
+    Type: 'AWS::EC2::VPCGatewayAttachment'
+    Properties:
+      VpcId: !Ref demoeksclusterDefaultVpc07F17AD1
+      InternetGatewayId: !Ref demoeksclusterDefaultVpcIGW583CB09E
+    Metadata:
+      'aws:cdk:path': ClusterStack-us-east-1/demoeks--cluster/DefaultVpc/VPCGW
+  demoeksclusterRoleF05882D7:
+    Type: 'AWS::IAM::Role'
+    Properties:
+      AssumeRolePolicyDocument:
+        Statement:
+          - Action: 'sts:AssumeRole'
+            Effect: Allow
+            Principal:
+              Service: eks.amazonaws.com
+        Version: 2012-10-17
+      ManagedPolicyArns:
+        - !Join 
+          - ''
+          - - 'arn:'
+            - !Ref 'AWS::Partition'
+            - ':iam::aws:policy/AmazonEKSClusterPolicy'
+    Metadata:
+      'aws:cdk:path': ClusterStack-us-east-1/demoeks--cluster/Role/Resource
+  demoeksclusterControlPlaneSecurityGroupED889624:
+    Type: 'AWS::EC2::SecurityGroup'
+    Properties:
+      GroupDescription: EKS Control Plane Security Group
+      SecurityGroupEgress:
+        - CidrIp: 0.0.0.0/0
+          Description: Allow all outbound traffic by default
+          IpProtocol: '-1'
+      VpcId: !Ref demoeksclusterDefaultVpc07F17AD1
+    Metadata:
+      'aws:cdk:path': >-
+        ClusterStack-us-east-1/demoeks--cluster/ControlPlaneSecurityGroup/Resource
+  demoeksclusterCreationRoleEF29520E:
+    Type: 'AWS::IAM::Role'
+    Properties:
+      AssumeRolePolicyDocument:
+        Statement:
+          - Action: 'sts:AssumeRole'
+            Effect: Allow
+            Principal:
+              AWS: !Join 
+                - ''
+                - - 'arn:'
+                  - !Ref 'AWS::Partition'
+                  - ':iam::177340731096:root'
+        Version: 2012-10-17
+    DependsOn:
+      - demoeksclusterDefaultVpcIGW583CB09E
+      - demoeksclusterDefaultVpcPrivateSubnet1DefaultRouteB404B27E
+      - demoeksclusterDefaultVpcPrivateSubnet1RouteTable3B8064CE
+      - demoeksclusterDefaultVpcPrivateSubnet1RouteTableAssociation141B5A7E
+      - demoeksclusterDefaultVpcPrivateSubnet1Subnet781368CC
+      - demoeksclusterDefaultVpcPrivateSubnet2DefaultRouteF0DB4CC7
+      - demoeksclusterDefaultVpcPrivateSubnet2RouteTableCF14740E
+      - demoeksclusterDefaultVpcPrivateSubnet2RouteTableAssociationF0AB752F
+      - demoeksclusterDefaultVpcPrivateSubnet2Subnet9C0556E9
+      - demoeksclusterDefaultVpcPrivateSubnet3DefaultRoute7631089B
+      - demoeksclusterDefaultVpcPrivateSubnet3RouteTableC3AC4D54
+      - demoeksclusterDefaultVpcPrivateSubnet3RouteTableAssociationDF08ECE0
+      - demoeksclusterDefaultVpcPrivateSubnet3Subnet5F9A479C
+      - demoeksclusterDefaultVpcPublicSubnet1DefaultRoute1CE82014
+      - demoeksclusterDefaultVpcPublicSubnet1EIP39A1D3AC
+      - demoeksclusterDefaultVpcPublicSubnet1NATGateway82C7E961
+      - demoeksclusterDefaultVpcPublicSubnet1RouteTable1C0622A7
+      - demoeksclusterDefaultVpcPublicSubnet1RouteTableAssociationA1C160D8
+      - demoeksclusterDefaultVpcPublicSubnet1Subnet80D0BD59
+      - demoeksclusterDefaultVpcPublicSubnet2DefaultRoute2B38DDD2
+      - demoeksclusterDefaultVpcPublicSubnet2EIP202916A9
+      - demoeksclusterDefaultVpcPublicSubnet2NATGateway610C00A7
+      - demoeksclusterDefaultVpcPublicSubnet2RouteTable8AD56BBD
+      - demoeksclusterDefaultVpcPublicSubnet2RouteTableAssociation773C86A6
+      - demoeksclusterDefaultVpcPublicSubnet2SubnetD4D57D44
+      - demoeksclusterDefaultVpcPublicSubnet3DefaultRouteE0595C6B
+      - demoeksclusterDefaultVpcPublicSubnet3EIP61285534
+      - demoeksclusterDefaultVpcPublicSubnet3NATGatewayF86338D9
+      - demoeksclusterDefaultVpcPublicSubnet3RouteTable90AB595F
+      - demoeksclusterDefaultVpcPublicSubnet3RouteTableAssociation229D4831
+      - demoeksclusterDefaultVpcPublicSubnet3Subnet2AC6CD39
+      - demoeksclusterDefaultVpc07F17AD1
+      - demoeksclusterDefaultVpcVPCGWCB409015
+    Metadata:
+      'aws:cdk:path': ClusterStack-us-east-1/demoeks--cluster/Resource/CreationRole/Resource
+  demoeksclusterCreationRoleDefaultPolicy9D22F7C2:
+    Type: 'AWS::IAM::Policy'
+    Properties:
+      PolicyDocument:
+        Statement:
+          - Action: 'iam:PassRole'
+            Effect: Allow
+            Resource: !GetAtt 
+              - demoeksclusterRoleF05882D7
+              - Arn
+          - Action:
+              - 'eks:CreateCluster'
+              - 'eks:DescribeCluster'
+              - 'eks:DescribeUpdate'
+              - 'eks:DeleteCluster'
+              - 'eks:UpdateClusterVersion'
+              - 'eks:UpdateClusterConfig'
+              - 'eks:CreateFargateProfile'
+              - 'eks:TagResource'
+              - 'eks:UntagResource'
+            Effect: Allow
+            Resource:
+              - !Join 
+                - ''
+                - - 'arn:'
+                  - !Ref 'AWS::Partition'
+                  - ':eks:us-east-1:177340731096:cluster/demoeks'
+              - !Join 
+                - ''
+                - - 'arn:'
+                  - !Ref 'AWS::Partition'
+                  - ':eks:us-east-1:177340731096:cluster/demoeks/*'
+          - Action:
+              - 'eks:DescribeFargateProfile'
+              - 'eks:DeleteFargateProfile'
+            Effect: Allow
+            Resource: !Join 
+              - ''
+              - - 'arn:'
+                - !Ref 'AWS::Partition'
+                - ':eks:us-east-1:177340731096:fargateprofile/demoeks/*'
+          - Action:
+              - 'iam:GetRole'
+              - 'iam:listAttachedRolePolicies'
+            Effect: Allow
+            Resource: '*'
+          - Action: 'iam:CreateServiceLinkedRole'
+            Effect: Allow
+            Resource: '*'
+          - Action:
+              - 'ec2:DescribeInstances'
+              - 'ec2:DescribeNetworkInterfaces'
+              - 'ec2:DescribeSecurityGroups'
+              - 'ec2:DescribeSubnets'
+              - 'ec2:DescribeRouteTables'
+              - 'ec2:DescribeDhcpOptions'
+              - 'ec2:DescribeVpcs'
+            Effect: Allow
+            Resource: '*'
+        Version: 2012-10-17
+      PolicyName: demoeksclusterCreationRoleDefaultPolicy9D22F7C2
+      Roles:
+        - !Ref demoeksclusterCreationRoleEF29520E
+    DependsOn:
+      - demoeksclusterDefaultVpcIGW583CB09E
+      - demoeksclusterDefaultVpcPrivateSubnet1DefaultRouteB404B27E
+      - demoeksclusterDefaultVpcPrivateSubnet1RouteTable3B8064CE
+      - demoeksclusterDefaultVpcPrivateSubnet1RouteTableAssociation141B5A7E
+      - demoeksclusterDefaultVpcPrivateSubnet1Subnet781368CC
+      - demoeksclusterDefaultVpcPrivateSubnet2DefaultRouteF0DB4CC7
+      - demoeksclusterDefaultVpcPrivateSubnet2RouteTableCF14740E
+      - demoeksclusterDefaultVpcPrivateSubnet2RouteTableAssociationF0AB752F
+      - demoeksclusterDefaultVpcPrivateSubnet2Subnet9C0556E9
+      - demoeksclusterDefaultVpcPrivateSubnet3DefaultRoute7631089B
+      - demoeksclusterDefaultVpcPrivateSubnet3RouteTableC3AC4D54
+      - demoeksclusterDefaultVpcPrivateSubnet3RouteTableAssociationDF08ECE0
+      - demoeksclusterDefaultVpcPrivateSubnet3Subnet5F9A479C
+      - demoeksclusterDefaultVpcPublicSubnet1DefaultRoute1CE82014
+      - demoeksclusterDefaultVpcPublicSubnet1EIP39A1D3AC
+      - demoeksclusterDefaultVpcPublicSubnet1NATGateway82C7E961
+      - demoeksclusterDefaultVpcPublicSubnet1RouteTable1C0622A7
+      - demoeksclusterDefaultVpcPublicSubnet1RouteTableAssociationA1C160D8
+      - demoeksclusterDefaultVpcPublicSubnet1Subnet80D0BD59
+      - demoeksclusterDefaultVpcPublicSubnet2DefaultRoute2B38DDD2
+      - demoeksclusterDefaultVpcPublicSubnet2EIP202916A9
+      - demoeksclusterDefaultVpcPublicSubnet2NATGateway610C00A7
+      - demoeksclusterDefaultVpcPublicSubnet2RouteTable8AD56BBD
+      - demoeksclusterDefaultVpcPublicSubnet2RouteTableAssociation773C86A6
+      - demoeksclusterDefaultVpcPublicSubnet2SubnetD4D57D44
+      - demoeksclusterDefaultVpcPublicSubnet3DefaultRouteE0595C6B
+      - demoeksclusterDefaultVpcPublicSubnet3EIP61285534
+      - demoeksclusterDefaultVpcPublicSubnet3NATGatewayF86338D9
+      - demoeksclusterDefaultVpcPublicSubnet3RouteTable90AB595F
+      - demoeksclusterDefaultVpcPublicSubnet3RouteTableAssociation229D4831
+      - demoeksclusterDefaultVpcPublicSubnet3Subnet2AC6CD39
+      - demoeksclusterDefaultVpc07F17AD1
+      - demoeksclusterDefaultVpcVPCGWCB409015
+    Metadata:
+      'aws:cdk:path': >-
+        ClusterStack-us-east-1/demoeks--cluster/Resource/CreationRole/DefaultPolicy/Resource
+  demoekscluster4A1730B7:
+    Type: 'Custom::AWSCDK-EKS-Cluster'
+    Properties:
+      ServiceToken: !GetAtt 
+        - >-
+          awscdkawseksClusterResourceProviderNestedStackawscdkawseksClusterResourceProviderNestedStackResource9827C454
+        - >-
+          Outputs.ClusterStackuseast1awscdkawseksClusterResourceProviderframeworkonEvent33EA6982Arn
+      Config:
+        name: demoeks
+        version: '1.21'
+        roleArn: !GetAtt 
+          - demoeksclusterRoleF05882D7
+          - Arn
+        resourcesVpcConfig:
+          subnetIds:
+            - !Ref demoeksclusterDefaultVpcPublicSubnet1Subnet80D0BD59
+            - !Ref demoeksclusterDefaultVpcPublicSubnet2SubnetD4D57D44
+            - !Ref demoeksclusterDefaultVpcPublicSubnet3Subnet2AC6CD39
+            - !Ref demoeksclusterDefaultVpcPrivateSubnet1Subnet781368CC
+            - !Ref demoeksclusterDefaultVpcPrivateSubnet2Subnet9C0556E9
+            - !Ref demoeksclusterDefaultVpcPrivateSubnet3Subnet5F9A479C
+          securityGroupIds:
+            - !GetAtt 
+              - demoeksclusterControlPlaneSecurityGroupED889624
+              - GroupId
+          endpointPublicAccess: true
+          endpointPrivateAccess: true
+      AssumeRoleArn: !GetAtt 
+        - demoeksclusterCreationRoleEF29520E
+        - Arn
+      AttributesRevision: 2
+    DependsOn:
+      - demoeksclusterDefaultVpcIGW583CB09E
+      - demoeksclusterDefaultVpcPrivateSubnet1DefaultRouteB404B27E
+      - demoeksclusterDefaultVpcPrivateSubnet1RouteTable3B8064CE
+      - demoeksclusterDefaultVpcPrivateSubnet1RouteTableAssociation141B5A7E
+      - demoeksclusterDefaultVpcPrivateSubnet1Subnet781368CC
+      - demoeksclusterDefaultVpcPrivateSubnet2DefaultRouteF0DB4CC7
+      - demoeksclusterDefaultVpcPrivateSubnet2RouteTableCF14740E
+      - demoeksclusterDefaultVpcPrivateSubnet2RouteTableAssociationF0AB752F
+      - demoeksclusterDefaultVpcPrivateSubnet2Subnet9C0556E9
+      - demoeksclusterDefaultVpcPrivateSubnet3DefaultRoute7631089B
+      - demoeksclusterDefaultVpcPrivateSubnet3RouteTableC3AC4D54
+      - demoeksclusterDefaultVpcPrivateSubnet3RouteTableAssociationDF08ECE0
+      - demoeksclusterDefaultVpcPrivateSubnet3Subnet5F9A479C
+      - demoeksclusterDefaultVpcPublicSubnet1DefaultRoute1CE82014
+      - demoeksclusterDefaultVpcPublicSubnet1EIP39A1D3AC
+      - demoeksclusterDefaultVpcPublicSubnet1NATGateway82C7E961
+      - demoeksclusterDefaultVpcPublicSubnet1RouteTable1C0622A7
+      - demoeksclusterDefaultVpcPublicSubnet1RouteTableAssociationA1C160D8
+      - demoeksclusterDefaultVpcPublicSubnet1Subnet80D0BD59
+      - demoeksclusterDefaultVpcPublicSubnet2DefaultRoute2B38DDD2
+      - demoeksclusterDefaultVpcPublicSubnet2EIP202916A9
+      - demoeksclusterDefaultVpcPublicSubnet2NATGateway610C00A7
+      - demoeksclusterDefaultVpcPublicSubnet2RouteTable8AD56BBD
+      - demoeksclusterDefaultVpcPublicSubnet2RouteTableAssociation773C86A6
+      - demoeksclusterDefaultVpcPublicSubnet2SubnetD4D57D44
+      - demoeksclusterDefaultVpcPublicSubnet3DefaultRouteE0595C6B
+      - demoeksclusterDefaultVpcPublicSubnet3EIP61285534
+      - demoeksclusterDefaultVpcPublicSubnet3NATGatewayF86338D9
+      - demoeksclusterDefaultVpcPublicSubnet3RouteTable90AB595F
+      - demoeksclusterDefaultVpcPublicSubnet3RouteTableAssociation229D4831
+      - demoeksclusterDefaultVpcPublicSubnet3Subnet2AC6CD39
+      - demoeksclusterDefaultVpc07F17AD1
+      - demoeksclusterDefaultVpcVPCGWCB409015
+      - demoeksclusterCreationRoleDefaultPolicy9D22F7C2
+      - demoeksclusterCreationRoleEF29520E
+    UpdateReplacePolicy: Delete
+    DeletionPolicy: Delete
+    Metadata:
+      'aws:cdk:path': ClusterStack-us-east-1/demoeks--cluster/Resource/Resource/Default
+  demoeksclusterKubectlReadyBarrier20DBAA03:
+    Type: 'AWS::SSM::Parameter'
+    Properties:
+      Type: String
+      Value: 'aws:cdk:eks:kubectl-ready'
+    DependsOn:
+      - demoeksclusterCreationRoleDefaultPolicy9D22F7C2
+      - demoeksclusterCreationRoleEF29520E
+      - demoekscluster4A1730B7
+    Metadata:
+      'aws:cdk:path': ClusterStack-us-east-1/demoeks--cluster/KubectlReadyBarrier
+  demoeksclusterAwsAuthmanifestFC6D85CE:
+    Type: 'Custom::AWSCDK-EKS-KubernetesResource'
+    Properties:
+      ServiceToken: !GetAtt 
+        - >-
+          awscdkawseksKubectlProviderNestedStackawscdkawseksKubectlProviderNestedStackResourceA7AEBA6B
+        - >-
+          Outputs.ClusterStackuseast1awscdkawseksKubectlProviderframeworkonEvent27FB60DBArn
+      Manifest: !Join 
+        - ''
+        - - >-
+            [{"apiVersion":"v1","kind":"ConfigMap","metadata":{"name":"aws-auth","namespace":"kube-system","labels":{"aws.cdk.eks/prune-c8afd9eb859842b69d61a8c15877070f4bedc10cc6":""}},"data":{"mapRoles":"[{\"rolearn\":\"
+          - !GetAtt 
+            - AdminRole38563C57
+            - Arn
+          - '\",\"username\":\"'
+          - !GetAtt 
+            - AdminRole38563C57
+            - Arn
+          - '\",\"groups\":[\"system:masters\"]},{\"rolearn\":\"'
+          - !GetAtt 
+            - demoeksclusterNodegroupDefaultCapacityNodeGroupRole451E2E14
+            - Arn
+          - >-
+            \",\"username\":\"system:node:{{EC2PrivateDNSName}}\",\"groups\":[\"system:bootstrappers\",\"system:nodes\"]},{\"rolearn\":\"
+          - !GetAtt 
+            - for1stregionDC87AA9A
+            - Arn
+          - '\",\"username\":\"'
+          - !GetAtt 
+            - for1stregionDC87AA9A
+            - Arn
+          - >-
+            \",\"groups\":[\"system:masters\"]}]","mapUsers":"[]","mapAccounts":"[]"}}]
+      ClusterName: !Ref demoekscluster4A1730B7
+      RoleArn: !GetAtt 
+        - demoeksclusterCreationRoleEF29520E
+        - Arn
+      PruneLabel: aws.cdk.eks/prune-c8afd9eb859842b69d61a8c15877070f4bedc10cc6
+      Overwrite: true
+    DependsOn:
+      - demoeksclusterKubectlReadyBarrier20DBAA03
+    UpdateReplacePolicy: Delete
+    DeletionPolicy: Delete
+    Metadata:
+      'aws:cdk:path': >-
+        ClusterStack-us-east-1/demoeks--cluster/AwsAuth/manifest/Resource/Default
+  demoeksclusterNodegroupDefaultCapacityNodeGroupRole451E2E14:
+    Type: 'AWS::IAM::Role'
+    Properties:
+      AssumeRolePolicyDocument:
+        Statement:
+          - Action: 'sts:AssumeRole'
+            Effect: Allow
+            Principal:
+              Service: ec2.amazonaws.com
+        Version: 2012-10-17
+      ManagedPolicyArns:
+        - !Join 
+          - ''
+          - - 'arn:'
+            - !Ref 'AWS::Partition'
+            - ':iam::aws:policy/AmazonEKSWorkerNodePolicy'
+        - !Join 
+          - ''
+          - - 'arn:'
+            - !Ref 'AWS::Partition'
+            - ':iam::aws:policy/AmazonEKS_CNI_Policy'
+        - !Join 
+          - ''
+          - - 'arn:'
+            - !Ref 'AWS::Partition'
+            - ':iam::aws:policy/AmazonEC2ContainerRegistryReadOnly'
+    Metadata:
+      'aws:cdk:path': >-
+        ClusterStack-us-east-1/demoeks--cluster/NodegroupDefaultCapacity/NodeGroupRole/Resource
+  demoeksclusterNodegroupDefaultCapacity9AC0D300:
+    Type: 'AWS::EKS::Nodegroup'
+    Properties:
+      ClusterName: !Ref demoekscluster4A1730B7
+      NodeRole: !GetAtt 
+        - demoeksclusterNodegroupDefaultCapacityNodeGroupRole451E2E14
+        - Arn
+      Subnets:
+        - !Ref demoeksclusterDefaultVpcPrivateSubnet1Subnet781368CC
+        - !Ref demoeksclusterDefaultVpcPrivateSubnet2Subnet9C0556E9
+        - !Ref demoeksclusterDefaultVpcPrivateSubnet3Subnet5F9A479C
+      AmiType: AL2_x86_64
+      ForceUpdateEnabled: true
+      InstanceTypes:
+        - t3.medium
+      ScalingConfig:
+        DesiredSize: 2
+        MaxSize: 2
+        MinSize: 2
+    Metadata:
+      'aws:cdk:path': >-
+        ClusterStack-us-east-1/demoeks--cluster/NodegroupDefaultCapacity/Resource
+  demoeksclustermanifest00namespaces0D081A101:
+    Type: 'Custom::AWSCDK-EKS-KubernetesResource'
+    Properties:
+      ServiceToken: !GetAtt 
+        - >-
+          awscdkawseksKubectlProviderNestedStackawscdkawseksKubectlProviderNestedStackResourceA7AEBA6B
+        - >-
+          Outputs.ClusterStackuseast1awscdkawseksKubectlProviderframeworkonEvent27FB60DBArn
+      Manifest: >-
+        [{"apiVersion":"v1","kind":"Namespace","metadata":{"name":"management","labels":{"aws.cdk.eks/prune-c89de2523cc805846a1861f2272fb8df67e5d33ea0":""}}}]
+      ClusterName: !Ref demoekscluster4A1730B7
+      RoleArn: !GetAtt 
+        - demoeksclusterCreationRoleEF29520E
+        - Arn
+      PruneLabel: aws.cdk.eks/prune-c89de2523cc805846a1861f2272fb8df67e5d33ea0
+    DependsOn:
+      - demoeksclusterKubectlReadyBarrier20DBAA03
+    UpdateReplacePolicy: Delete
+    DeletionPolicy: Delete
+    Metadata:
+      'aws:cdk:path': >-
+        ClusterStack-us-east-1/demoeks--cluster/manifest-00_namespaces0/Resource/Default
+  demoeksclustermanifest00namespaces18A3EBB40:
+    Type: 'Custom::AWSCDK-EKS-KubernetesResource'
+    Properties:
+      ServiceToken: !GetAtt 
+        - >-
+          awscdkawseksKubectlProviderNestedStackawscdkawseksKubectlProviderNestedStackResourceA7AEBA6B
+        - >-
+          Outputs.ClusterStackuseast1awscdkawseksKubectlProviderframeworkonEvent27FB60DBArn
+      Manifest: >-
+        [{"apiVersion":"v1","kind":"ResourceQuota","metadata":{"name":"mem-cpu-demo","namespace":"management","labels":{"aws.cdk.eks/prune-c8fd9bdc7d5a9621410e1c7de90f4c221fd80cccca":""}},"spec":{"hard":{"requests.cpu":"1","requests.memory":"1Gi","limits.cpu":"2","limits.memory":"2Gi"}}}]
+      ClusterName: !Ref demoekscluster4A1730B7
+      RoleArn: !GetAtt 
+        - demoeksclusterCreationRoleEF29520E
+        - Arn
+      PruneLabel: aws.cdk.eks/prune-c8fd9bdc7d5a9621410e1c7de90f4c221fd80cccca
+    DependsOn:
+      - demoeksclusterKubectlReadyBarrier20DBAA03
+      - demoeksclustermanifest00namespaces0D081A101
+    UpdateReplacePolicy: Delete
+    DeletionPolicy: Delete
+    Metadata:
+      'aws:cdk:path': >-
+        ClusterStack-us-east-1/demoeks--cluster/manifest-00_namespaces1/Resource/Default
+  demoeksclustermanifest00namespaces2E190171D:
+    Type: 'Custom::AWSCDK-EKS-KubernetesResource'
+    Properties:
+      ServiceToken: !GetAtt 
+        - >-
+          awscdkawseksKubectlProviderNestedStackawscdkawseksKubectlProviderNestedStackResourceA7AEBA6B
+        - >-
+          Outputs.ClusterStackuseast1awscdkawseksKubectlProviderframeworkonEvent27FB60DBArn
+      Manifest: >-
+        [{"apiVersion":"v1","kind":"ResourceQuota","metadata":{"name":"storage-ns1","namespace":"management","labels":{"aws.cdk.eks/prune-c85bc541645de525b48f3aaca919e1edf2cb5c0cb3":""}},"spec":{"hard":{"storagens2.storageclass.storage.k8s.io/requests.storage":0}}}]
+      ClusterName: !Ref demoekscluster4A1730B7
+      RoleArn: !GetAtt 
+        - demoeksclusterCreationRoleEF29520E
+        - Arn
+      PruneLabel: aws.cdk.eks/prune-c85bc541645de525b48f3aaca919e1edf2cb5c0cb3
+    DependsOn:
+      - demoeksclusterKubectlReadyBarrier20DBAA03
+      - demoeksclustermanifest00namespaces18A3EBB40
+    UpdateReplacePolicy: Delete
+    DeletionPolicy: Delete
+    Metadata:
+      'aws:cdk:path': >-
+        ClusterStack-us-east-1/demoeks--cluster/manifest-00_namespaces2/Resource/Default
+  demoeksclustermanifest00apnginx0B6C1FBA4:
+    Type: 'Custom::AWSCDK-EKS-KubernetesResource'
+    Properties:
+      ServiceToken: !GetAtt 
+        - >-
+          awscdkawseksKubectlProviderNestedStackawscdkawseksKubectlProviderNestedStackResourceA7AEBA6B
+        - >-
+          Outputs.ClusterStackuseast1awscdkawseksKubectlProviderframeworkonEvent27FB60DBArn
+      Manifest: >-
+        [{"apiVersion":"apps/v1","kind":"Deployment","metadata":{"name":"nginx-deployment","labels":{"aws.cdk.eks/prune-c85c1e18a7e2f48f8a7bc246100cf56e6ca9e186e0":"","app":"nginx"}},"spec":{"replicas":2,"selector":{"matchLabels":{"app":"nginx"}},"template":{"metadata":{"labels":{"app":"nginx"}},"spec":{"containers":[{"name":"nginx","image":"nginx:1.7.9","ports":[{"containerPort":80}]}]}}}}]
+      ClusterName: !Ref demoekscluster4A1730B7
+      RoleArn: !GetAtt 
+        - demoeksclusterCreationRoleEF29520E
+        - Arn
+      PruneLabel: aws.cdk.eks/prune-c85c1e18a7e2f48f8a7bc246100cf56e6ca9e186e0
+    DependsOn:
+      - demoeksclusterKubectlReadyBarrier20DBAA03
+    UpdateReplacePolicy: Delete
+    DeletionPolicy: Delete
+    Metadata:
+      'aws:cdk:path': >-
+        ClusterStack-us-east-1/demoeks--cluster/manifest-00_ap_nginx0/Resource/Default
+  demoeksclusterchartPrometheus886DE516:
+    Type: 'Custom::AWSCDK-EKS-HelmChart'
+    Properties:
+      ServiceToken: !GetAtt 
+        - >-
+          awscdkawseksKubectlProviderNestedStackawscdkawseksKubectlProviderNestedStackResourceA7AEBA6B
+        - >-
+          Outputs.ClusterStackuseast1awscdkawseksKubectlProviderframeworkonEvent27FB60DBArn
+      ClusterName: !Ref demoekscluster4A1730B7
+      RoleArn: !GetAtt 
+        - demoeksclusterCreationRoleEF29520E
+        - Arn
+      Release: prometheus
+      Chart: prometheus
+      Version: 14.6.0
+      Values: >-
+        {"alertmanager":{"persistentVolume":{"storageClass":"gp2"}},"server":{"persistentVolume":{"storageClass":"gp2"}}}
+      Namespace: prometheus
+      Repository: 'https://prometheus-community.github.io/helm-charts'
+      CreateNamespace: true
+    DependsOn:
+      - demoeksclusterKubectlReadyBarrier20DBAA03
+    UpdateReplacePolicy: Delete
+    DeletionPolicy: Delete
+    Metadata:
+      'aws:cdk:path': >-
+        ClusterStack-us-east-1/demoeks--cluster/chart-Prometheus/Resource/Default
+  awscdkawseksClusterResourceProviderNestedStackawscdkawseksClusterResourceProviderNestedStackResource9827C454:
+    Type: 'AWS::CloudFormation::Stack'
+    Properties:
+      TemplateURL: !Join 
+        - ''
+        - - 'https://s3.us-east-1.'
+          - !Ref 'AWS::URLSuffix'
+          - >-
+            /cdk-hnb659fds-assets-177340731096-us-east-1/6d47d61211b63d7ba344fb0e8d133ea0f3f5e86a95d9f8cd021d5f82f48bea63.json
+      Parameters:
+        referencetoClusterStackuseast1demoeksclusterCreationRoleD0EA0144Arn: !GetAtt 
+          - demoeksclusterCreationRoleEF29520E
+          - Arn
+    UpdateReplacePolicy: Delete
+    DeletionPolicy: Delete
+    Metadata:
+      'aws:cdk:path': >-
+        ClusterStack-us-east-1/@aws-cdk--aws-eks.ClusterResourceProvider.NestedStack/@aws-cdk--aws-eks.ClusterResourceProvider.NestedStackResource
+      'aws:asset:path': >-
+        ClusterStackuseast1awscdkawseksClusterResourceProviderBDDE7EE4.nested.template.json
+      'aws:asset:property': TemplateURL
+  awscdkawseksKubectlProviderNestedStackawscdkawseksKubectlProviderNestedStackResourceA7AEBA6B:
+    Type: 'AWS::CloudFormation::Stack'
+    Properties:
+      TemplateURL: !Join 
+        - ''
+        - - 'https://s3.us-east-1.'
+          - !Ref 'AWS::URLSuffix'
+          - >-
+            /cdk-hnb659fds-assets-177340731096-us-east-1/039b618c8acee78cbd645d8dc950e8a5f3d53176f166dad68afb14ebdcc32bab.json
+      Parameters:
+        referencetoClusterStackuseast1demoekscluster75768A70Arn: !GetAtt 
+          - demoekscluster4A1730B7
+          - Arn
+        referencetoClusterStackuseast1demoeksclusterCreationRoleD0EA0144Arn: !GetAtt 
+          - demoeksclusterCreationRoleEF29520E
+          - Arn
+        referencetoClusterStackuseast1demoeksclusterDefaultVpcPrivateSubnet1Subnet7576EDF7Ref: !Ref demoeksclusterDefaultVpcPrivateSubnet1Subnet781368CC
+        referencetoClusterStackuseast1demoeksclusterDefaultVpcPrivateSubnet2Subnet3D3ACFB9Ref: !Ref demoeksclusterDefaultVpcPrivateSubnet2Subnet9C0556E9
+        referencetoClusterStackuseast1demoeksclusterDefaultVpcPrivateSubnet3Subnet292D63E1Ref: !Ref demoeksclusterDefaultVpcPrivateSubnet3Subnet5F9A479C
+        referencetoClusterStackuseast1demoekscluster75768A70ClusterSecurityGroupId: !GetAtt 
+          - demoekscluster4A1730B7
+          - ClusterSecurityGroupId
+    UpdateReplacePolicy: Delete
+    DeletionPolicy: Delete
+    Metadata:
+      'aws:cdk:path': >-
+        ClusterStack-us-east-1/@aws-cdk--aws-eks.KubectlProvider.NestedStack/@aws-cdk--aws-eks.KubectlProvider.NestedStackResource
+      'aws:asset:path': >-
+        ClusterStackuseast1awscdkawseksKubectlProviderECDA6C42.nested.template.json
+      'aws:asset:property': TemplateURL
+  for1stregionDC87AA9A:
+    Type: 'AWS::IAM::Role'
+    Properties:
+      AssumeRolePolicyDocument:
+        Statement:
+          - Action: 'sts:AssumeRole'
+            Effect: Allow
+            Principal:
+              AWS: !Join 
+                - ''
+                - - 'arn:'
+                  - !Ref 'AWS::Partition'
+                  - ':iam::177340731096:root'
+        Version: 2012-10-17
+    Metadata:
+      'aws:cdk:path': ClusterStack-us-east-1/for-1st-region/Resource
+  CDKMetadata:
+    Type: 'AWS::CDK::Metadata'
+    Properties:
+      Analytics: >-
+        v2:deflate64:H4sIAAAAAAAA/1VQXU+EMBD8LfdeqqKJvhJizotRCZh7NaW3Jz2gJe3uEUL477bgife0M5P9mJ2Y3z/weCN6F8lDHTWq5GOBQtbMS1+jEi0fc9MAS496rplplBwCXdDEoHZ8TBtyCJYlvUsIK/ZKJVgNCO5NaHUEh+zdHODbGurC8EpeoGnTSlj0m2TMx30nQ8M+S1lGpT9RUOkXBW1FuSGET1EuxhZ91RLnjFQCldF/zQE877L5tsCtQOjFwDKrzh6ui3caZ9+XhsXJL0vQJ1O1oJEVIMkqHLaXh66EaWI5OENW+rs+GNOu1Pv5hz8IO1qeC6lPTPtg+MndnO+e+CO/3ZycUpEljaoFni/1B7P+0Ny1AQAA
+    Metadata:
+      'aws:cdk:path': ClusterStack-us-east-1/CDKMetadata/Default
+Outputs:
+  demoeksclusterConfigCommandD1E3B8D4:
+    Value: !Join 
+      - ''
+      - - 'aws eks update-kubeconfig --name '
+        - !Ref demoekscluster4A1730B7
+        - ' --region us-east-1 --role-arn '
+        - !GetAtt 
+          - AdminRole38563C57
+          - Arn
+  demoeksclusterGetTokenCommandA25D6436:
+    Value: !Join 
+      - ''
+      - - 'aws eks get-token --cluster-name '
+        - !Ref demoekscluster4A1730B7
+        - ' --region us-east-1 --role-arn '
+        - !GetAtt 
+          - AdminRole38563C57
+          - Arn
+  ExportsOutputFnGetAttfor1stregionDC87AA9AArn75355E57:
+    Value: !GetAtt 
+      - for1stregionDC87AA9A
+      - Arn
+    Export:
+      Name: >-
+        ClusterStack-us-east-1:ExportsOutputFnGetAttfor1stregionDC87AA9AArn75355E57
+  ExportsOutputRefdemoekscluster4A1730B7709FBD07:
+    Value: !Ref demoekscluster4A1730B7
+    Export:
+      Name: 'ClusterStack-us-east-1:ExportsOutputRefdemoekscluster4A1730B7709FBD07'
+Parameters:
+  BootstrapVersion:
+    Type: 'AWS::SSM::Parameter::Value<String>'
+    Default: /cdk-bootstrap/hnb659fds/version
+    Description: >-
+      Version of the CDK Bootstrap resources in this environment, automatically
+      retrieved from SSM Parameter Store. [cdk:skip]
+Rules:
+  CheckBootstrapVersion:
+    Assertions:
+      - Assert: !Not 
+          - 'Fn::Contains':
+              - - '1'
+                - '2'
+                - '3'
+                - '4'
+                - '5'
+              - !Ref BootstrapVersion
+        AssertDescription: >-
+          CDK bootstrap stack version 6 required. Please run 'cdk bootstrap'
+          with a recent version of the CDK CLI.

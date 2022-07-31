@@ -1,0 +1,1152 @@
+Resources:
+  hellopyfordemogo02871D68:
+    Type: 'AWS::CodeCommit::Repository'
+    Properties:
+      RepositoryName: hello-py-us-east-1
+    Metadata:
+      'aws:cdk:path': CicdStack/hello-py-for-demogo/Resource
+  hellopyfordemogoCicdStackmultiregioneksdep59B96E20EventRule6683F84D:
+    Type: 'AWS::Events::Rule'
+    Properties:
+      EventPattern:
+        source:
+          - aws.codecommit
+        resources:
+          - !GetAtt 
+            - hellopyfordemogo02871D68
+            - Arn
+        detail-type:
+          - CodeCommit Repository State Change
+        detail:
+          event:
+            - referenceCreated
+            - referenceUpdated
+          referenceName:
+            - master
+      State: ENABLED
+      Targets:
+        - Arn: !Join 
+            - ''
+            - - 'arn:'
+              - !Ref 'AWS::Partition'
+              - ':codepipeline:us-east-1:177340731096:'
+              - !Ref multiregioneksdep891418B4
+          Id: Target0
+          RoleArn: !GetAtt 
+            - multiregioneksdepEventsRole0EE00C5D
+            - Arn
+    Metadata:
+      'aws:cdk:path': >-
+        CicdStack/hello-py-for-demogo/CicdStackmultiregioneksdep59B96E20EventRule/Resource
+  ecrforhellopy4240AB87:
+    Type: 'AWS::ECR::Repository'
+    UpdateReplacePolicy: Delete
+    DeletionPolicy: Delete
+    Metadata:
+      'aws:cdk:path': CicdStack/ecr-for-hello-py/Resource
+  buildtoecrRole0A7CD01C:
+    Type: 'AWS::IAM::Role'
+    Properties:
+      AssumeRolePolicyDocument:
+        Statement:
+          - Action: 'sts:AssumeRole'
+            Effect: Allow
+            Principal:
+              Service: codebuild.amazonaws.com
+        Version: 2012-10-17
+    Metadata:
+      'aws:cdk:path': CicdStack/build-to-ecr/Role/Resource
+  buildtoecrRoleDefaultPolicy29FD8181:
+    Type: 'AWS::IAM::Policy'
+    Properties:
+      PolicyDocument:
+        Statement:
+          - Action:
+              - 'logs:CreateLogGroup'
+              - 'logs:CreateLogStream'
+              - 'logs:PutLogEvents'
+            Effect: Allow
+            Resource:
+              - !Join 
+                - ''
+                - - 'arn:'
+                  - !Ref 'AWS::Partition'
+                  - ':logs:us-east-1:177340731096:log-group:/aws/codebuild/'
+                  - !Ref buildtoecr6773C6BF
+              - !Join 
+                - ''
+                - - 'arn:'
+                  - !Ref 'AWS::Partition'
+                  - ':logs:us-east-1:177340731096:log-group:/aws/codebuild/'
+                  - !Ref buildtoecr6773C6BF
+                  - ':*'
+          - Action:
+              - 'codebuild:CreateReportGroup'
+              - 'codebuild:CreateReport'
+              - 'codebuild:UpdateReport'
+              - 'codebuild:BatchPutTestCases'
+              - 'codebuild:BatchPutCodeCoverages'
+            Effect: Allow
+            Resource: !Join 
+              - ''
+              - - 'arn:'
+                - !Ref 'AWS::Partition'
+                - ':codebuild:us-east-1:177340731096:report-group/'
+                - !Ref buildtoecr6773C6BF
+                - '-*'
+          - Action:
+              - 'ecr:BatchCheckLayerAvailability'
+              - 'ecr:GetDownloadUrlForLayer'
+              - 'ecr:BatchGetImage'
+            Effect: Allow
+            Resource: !GetAtt 
+              - ecrforhellopy4240AB87
+              - Arn
+          - Action: 'ecr:GetAuthorizationToken'
+            Effect: Allow
+            Resource: '*'
+          - Action:
+              - 'ecr:PutImage'
+              - 'ecr:InitiateLayerUpload'
+              - 'ecr:UploadLayerPart'
+              - 'ecr:CompleteLayerUpload'
+            Effect: Allow
+            Resource: !GetAtt 
+              - ecrforhellopy4240AB87
+              - Arn
+          - Action:
+              - 's3:GetObject*'
+              - 's3:GetBucket*'
+              - 's3:List*'
+            Effect: Allow
+            Resource:
+              - !GetAtt 
+                - multiregioneksdepArtifactsBucket1B9BA65D
+                - Arn
+              - !Join 
+                - ''
+                - - !GetAtt 
+                    - multiregioneksdepArtifactsBucket1B9BA65D
+                    - Arn
+                  - /*
+          - Action:
+              - 'kms:Decrypt'
+              - 'kms:DescribeKey'
+            Effect: Allow
+            Resource: !GetAtt 
+              - multiregioneksdepArtifactsBucketEncryptionKey2FC124C7
+              - Arn
+          - Action:
+              - 'kms:Decrypt'
+              - 'kms:Encrypt'
+              - 'kms:ReEncrypt*'
+              - 'kms:GenerateDataKey*'
+            Effect: Allow
+            Resource: !GetAtt 
+              - multiregioneksdepArtifactsBucketEncryptionKey2FC124C7
+              - Arn
+        Version: 2012-10-17
+      PolicyName: buildtoecrRoleDefaultPolicy29FD8181
+      Roles:
+        - !Ref buildtoecrRole0A7CD01C
+    Metadata:
+      'aws:cdk:path': CicdStack/build-to-ecr/Role/DefaultPolicy/Resource
+  buildtoecr6773C6BF:
+    Type: 'AWS::CodeBuild::Project'
+    Properties:
+      Artifacts:
+        Type: CODEPIPELINE
+      Environment:
+        ComputeType: BUILD_GENERAL1_SMALL
+        EnvironmentVariables:
+          - Name: ECR_REPO_URI
+            Type: PLAINTEXT
+            Value: !Join 
+              - ''
+              - - !Select 
+                  - 4
+                  - !Split 
+                    - ':'
+                    - !GetAtt 
+                      - ecrforhellopy4240AB87
+                      - Arn
+                - .dkr.ecr.
+                - !Select 
+                  - 3
+                  - !Split 
+                    - ':'
+                    - !GetAtt 
+                      - ecrforhellopy4240AB87
+                      - Arn
+                - .
+                - !Ref 'AWS::URLSuffix'
+                - /
+                - !Ref ecrforhellopy4240AB87
+        Image: 'aws/codebuild/standard:4.0'
+        ImagePullCredentialsType: CODEBUILD
+        PrivilegedMode: true
+        Type: LINUX_CONTAINER
+      ServiceRole: !GetAtt 
+        - buildtoecrRole0A7CD01C
+        - Arn
+      Source:
+        BuildSpec: |-
+          {
+            "version": "0.2",
+            "phases": {
+              "pre_build": {
+                "commands": [
+                  "env",
+                  "$(aws ecr get-login --region $AWS_DEFAULT_REGION --no-include-email)",
+                  "IMAGE_TAG=$CODEBUILD_RESOLVED_SOURCE_VERSION"
+                ]
+              },
+              "build": {
+                "commands": [
+                  "docker build -t $ECR_REPO_URI:latest .",
+                  "docker tag $ECR_REPO_URI:latest $ECR_REPO_URI:$IMAGE_TAG"
+                ]
+              },
+              "post_build": {
+                "commands": [
+                  "docker push $ECR_REPO_URI:latest",
+                  "docker push $ECR_REPO_URI:$IMAGE_TAG"
+                ]
+              }
+            }
+          }
+        Type: CODEPIPELINE
+      Cache:
+        Type: NO_CACHE
+      EncryptionKey: !GetAtt 
+        - multiregioneksdepArtifactsBucketEncryptionKey2FC124C7
+        - Arn
+      Name: build-to-ecr
+    Metadata:
+      'aws:cdk:path': CicdStack/build-to-ecr/Resource
+  deploytoeksuseast1RoleC4A23ACD:
+    Type: 'AWS::IAM::Role'
+    Properties:
+      AssumeRolePolicyDocument:
+        Statement:
+          - Action: 'sts:AssumeRole'
+            Effect: Allow
+            Principal:
+              Service: codebuild.amazonaws.com
+        Version: 2012-10-17
+    Metadata:
+      'aws:cdk:path': CicdStack/deploy-to-eks-us-east-1/Role/Resource
+  deploytoeksuseast1RoleDefaultPolicyA0976B18:
+    Type: 'AWS::IAM::Policy'
+    Properties:
+      PolicyDocument:
+        Statement:
+          - Action:
+              - 'ecr:BatchCheckLayerAvailability'
+              - 'ecr:GetDownloadUrlForLayer'
+              - 'ecr:BatchGetImage'
+            Effect: Allow
+            Resource: !Join 
+              - ''
+              - - 'arn:'
+                - !Ref 'AWS::Partition'
+                - >-
+                  :ecr:us-east-1:177340731096:repository/cdk-hnb659fds-container-assets-177340731096-us-east-1
+          - Action: 'ecr:GetAuthorizationToken'
+            Effect: Allow
+            Resource: '*'
+          - Action:
+              - 'logs:CreateLogGroup'
+              - 'logs:CreateLogStream'
+              - 'logs:PutLogEvents'
+            Effect: Allow
+            Resource:
+              - !Join 
+                - ''
+                - - 'arn:'
+                  - !Ref 'AWS::Partition'
+                  - ':logs:us-east-1:177340731096:log-group:/aws/codebuild/'
+                  - !Ref deploytoeksuseast1E9BA2EC6
+              - !Join 
+                - ''
+                - - 'arn:'
+                  - !Ref 'AWS::Partition'
+                  - ':logs:us-east-1:177340731096:log-group:/aws/codebuild/'
+                  - !Ref deploytoeksuseast1E9BA2EC6
+                  - ':*'
+          - Action:
+              - 'codebuild:CreateReportGroup'
+              - 'codebuild:CreateReport'
+              - 'codebuild:UpdateReport'
+              - 'codebuild:BatchPutTestCases'
+              - 'codebuild:BatchPutCodeCoverages'
+            Effect: Allow
+            Resource: !Join 
+              - ''
+              - - 'arn:'
+                - !Ref 'AWS::Partition'
+                - ':codebuild:us-east-1:177340731096:report-group/'
+                - !Ref deploytoeksuseast1E9BA2EC6
+                - '-*'
+          - Action: 'eks:DescribeCluster'
+            Effect: Allow
+            Resource: '*'
+          - Action: 'sts:AssumeRole'
+            Effect: Allow
+            Resource: !ImportValue >-
+              ClusterStack-us-east-1:ExportsOutputFnGetAttfor1stregionDC87AA9AArn75355E57
+          - Action:
+              - 's3:GetObject*'
+              - 's3:GetBucket*'
+              - 's3:List*'
+            Effect: Allow
+            Resource:
+              - !GetAtt 
+                - multiregioneksdepArtifactsBucket1B9BA65D
+                - Arn
+              - !Join 
+                - ''
+                - - !GetAtt 
+                    - multiregioneksdepArtifactsBucket1B9BA65D
+                    - Arn
+                  - /*
+          - Action:
+              - 'kms:Decrypt'
+              - 'kms:DescribeKey'
+            Effect: Allow
+            Resource: !GetAtt 
+              - multiregioneksdepArtifactsBucketEncryptionKey2FC124C7
+              - Arn
+          - Action:
+              - 'kms:Decrypt'
+              - 'kms:Encrypt'
+              - 'kms:ReEncrypt*'
+              - 'kms:GenerateDataKey*'
+            Effect: Allow
+            Resource: !GetAtt 
+              - multiregioneksdepArtifactsBucketEncryptionKey2FC124C7
+              - Arn
+        Version: 2012-10-17
+      PolicyName: deploytoeksuseast1RoleDefaultPolicyA0976B18
+      Roles:
+        - !Ref deploytoeksuseast1RoleC4A23ACD
+    Metadata:
+      'aws:cdk:path': CicdStack/deploy-to-eks-us-east-1/Role/DefaultPolicy/Resource
+  deploytoeksuseast1E9BA2EC6:
+    Type: 'AWS::CodeBuild::Project'
+    Properties:
+      Artifacts:
+        Type: CODEPIPELINE
+      Environment:
+        ComputeType: BUILD_GENERAL1_SMALL
+        EnvironmentVariables:
+          - Name: REGION
+            Type: PLAINTEXT
+            Value: us-east-1
+          - Name: CLUSTER_NAME
+            Type: PLAINTEXT
+            Value: !ImportValue >-
+              ClusterStack-us-east-1:ExportsOutputRefdemoekscluster4A1730B7709FBD07
+          - Name: ECR_REPO_URI
+            Type: PLAINTEXT
+            Value: !Join 
+              - ''
+              - - !Select 
+                  - 4
+                  - !Split 
+                    - ':'
+                    - !GetAtt 
+                      - ecrforhellopy4240AB87
+                      - Arn
+                - .dkr.ecr.
+                - !Select 
+                  - 3
+                  - !Split 
+                    - ':'
+                    - !GetAtt 
+                      - ecrforhellopy4240AB87
+                      - Arn
+                - .
+                - !Ref 'AWS::URLSuffix'
+                - /
+                - !Ref ecrforhellopy4240AB87
+        Image: !Sub >-
+          177340731096.dkr.ecr.us-east-1.${AWS::URLSuffix}/cdk-hnb659fds-container-assets-177340731096-us-east-1:4e2150e8966f7d990bc0b63a98ede3410b3059295a5fd4d3a0d50480581410f1
+        ImagePullCredentialsType: SERVICE_ROLE
+        PrivilegedMode: false
+        Type: LINUX_CONTAINER
+      ServiceRole: !GetAtt 
+        - deploytoeksuseast1RoleC4A23ACD
+        - Arn
+      Source:
+        BuildSpec: !Join 
+          - ''
+          - - |-
+              {
+                "version": "0.2",
+                "phases": {
+                  "install": {
+                    "commands": [
+                      "env",
+                      "export TAG=${CODEBUILD_RESOLVED_SOURCE_VERSION}",
+                      "/usr/local/bin/entrypoint.sh"
+                    ]
+                  },
+                  "build": {
+                    "commands": [
+                      "CREDENTIALS=$(aws sts assume-role --role-arn \"
+            - !ImportValue >-
+              ClusterStack-us-east-1:ExportsOutputFnGetAttfor1stregionDC87AA9AArn75355E57
+            - |-
+              \" --role-session-name codebuild-cdk)",
+                      "export AWS_ACCESS_KEY_ID=\"$(echo ${CREDENTIALS} | jq -r '.Credentials.AccessKeyId')\"",
+                      "export AWS_SECRET_ACCESS_KEY=\"$(echo ${CREDENTIALS} | jq -r '.Credentials.SecretAccessKey')\"",
+                      "export AWS_SESSION_TOKEN=\"$(echo ${CREDENTIALS} | jq -r '.Credentials.SessionToken')\"",
+                      "export AWS_EXPIRATION=$(echo ${CREDENTIALS} | jq -r '.Credentials.Expiration')",
+                      "sed -i 's@CONTAINER_IMAGE@'\"$ECR_REPO_URI:$TAG\"'@' app-deployment.yaml",
+                      "kubectl apply -f app-deployment.yaml"
+                    ]
+                  }
+                }
+              }
+        Type: CODEPIPELINE
+      Cache:
+        Type: NO_CACHE
+      EncryptionKey: !GetAtt 
+        - multiregioneksdepArtifactsBucketEncryptionKey2FC124C7
+        - Arn
+    Metadata:
+      'aws:cdk:path': CicdStack/deploy-to-eks-us-east-1/Resource
+  deploytoeksuswest2Role33F1F116:
+    Type: 'AWS::IAM::Role'
+    Properties:
+      AssumeRolePolicyDocument:
+        Statement:
+          - Action: 'sts:AssumeRole'
+            Effect: Allow
+            Principal:
+              Service: codebuild.amazonaws.com
+        Version: 2012-10-17
+    Metadata:
+      'aws:cdk:path': CicdStack/deploy-to-eks-us-west-2/Role/Resource
+  deploytoeksuswest2RoleDefaultPolicy4902762E:
+    Type: 'AWS::IAM::Policy'
+    Properties:
+      PolicyDocument:
+        Statement:
+          - Action:
+              - 'ecr:BatchCheckLayerAvailability'
+              - 'ecr:GetDownloadUrlForLayer'
+              - 'ecr:BatchGetImage'
+            Effect: Allow
+            Resource: !Join 
+              - ''
+              - - 'arn:'
+                - !Ref 'AWS::Partition'
+                - >-
+                  :ecr:us-east-1:177340731096:repository/cdk-hnb659fds-container-assets-177340731096-us-east-1
+          - Action: 'ecr:GetAuthorizationToken'
+            Effect: Allow
+            Resource: '*'
+          - Action:
+              - 'logs:CreateLogGroup'
+              - 'logs:CreateLogStream'
+              - 'logs:PutLogEvents'
+            Effect: Allow
+            Resource:
+              - !Join 
+                - ''
+                - - 'arn:'
+                  - !Ref 'AWS::Partition'
+                  - ':logs:us-east-1:177340731096:log-group:/aws/codebuild/'
+                  - !Ref deploytoeksuswest2D926DC6C
+              - !Join 
+                - ''
+                - - 'arn:'
+                  - !Ref 'AWS::Partition'
+                  - ':logs:us-east-1:177340731096:log-group:/aws/codebuild/'
+                  - !Ref deploytoeksuswest2D926DC6C
+                  - ':*'
+          - Action:
+              - 'codebuild:CreateReportGroup'
+              - 'codebuild:CreateReport'
+              - 'codebuild:UpdateReport'
+              - 'codebuild:BatchPutTestCases'
+              - 'codebuild:BatchPutCodeCoverages'
+            Effect: Allow
+            Resource: !Join 
+              - ''
+              - - 'arn:'
+                - !Ref 'AWS::Partition'
+                - ':codebuild:us-east-1:177340731096:report-group/'
+                - !Ref deploytoeksuswest2D926DC6C
+                - '-*'
+          - Action: 'eks:DescribeCluster'
+            Effect: Allow
+            Resource: '*'
+          - Action: 'sts:AssumeRole'
+            Effect: Allow
+            Resource: !Join 
+              - ''
+              - - 'arn:'
+                - !Ref 'AWS::Partition'
+                - >-
+                  :iam::177340731096:role/clusterstack-us-west-2est2for2ndregiondd67da9a1c1382be101f
+          - Action:
+              - 's3:GetObject*'
+              - 's3:GetBucket*'
+              - 's3:List*'
+            Effect: Allow
+            Resource:
+              - !GetAtt 
+                - multiregioneksdepArtifactsBucket1B9BA65D
+                - Arn
+              - !Join 
+                - ''
+                - - !GetAtt 
+                    - multiregioneksdepArtifactsBucket1B9BA65D
+                    - Arn
+                  - /*
+          - Action:
+              - 'kms:Decrypt'
+              - 'kms:DescribeKey'
+            Effect: Allow
+            Resource: !GetAtt 
+              - multiregioneksdepArtifactsBucketEncryptionKey2FC124C7
+              - Arn
+          - Action:
+              - 'kms:Decrypt'
+              - 'kms:Encrypt'
+              - 'kms:ReEncrypt*'
+              - 'kms:GenerateDataKey*'
+            Effect: Allow
+            Resource: !GetAtt 
+              - multiregioneksdepArtifactsBucketEncryptionKey2FC124C7
+              - Arn
+        Version: 2012-10-17
+      PolicyName: deploytoeksuswest2RoleDefaultPolicy4902762E
+      Roles:
+        - !Ref deploytoeksuswest2Role33F1F116
+    Metadata:
+      'aws:cdk:path': CicdStack/deploy-to-eks-us-west-2/Role/DefaultPolicy/Resource
+  deploytoeksuswest2D926DC6C:
+    Type: 'AWS::CodeBuild::Project'
+    Properties:
+      Artifacts:
+        Type: CODEPIPELINE
+      Environment:
+        ComputeType: BUILD_GENERAL1_SMALL
+        EnvironmentVariables:
+          - Name: REGION
+            Type: PLAINTEXT
+            Value: us-west-2
+          - Name: CLUSTER_NAME
+            Type: PLAINTEXT
+            Value: demoeks
+          - Name: ECR_REPO_URI
+            Type: PLAINTEXT
+            Value: !Join 
+              - ''
+              - - !Select 
+                  - 4
+                  - !Split 
+                    - ':'
+                    - !GetAtt 
+                      - ecrforhellopy4240AB87
+                      - Arn
+                - .dkr.ecr.
+                - !Select 
+                  - 3
+                  - !Split 
+                    - ':'
+                    - !GetAtt 
+                      - ecrforhellopy4240AB87
+                      - Arn
+                - .
+                - !Ref 'AWS::URLSuffix'
+                - /
+                - !Ref ecrforhellopy4240AB87
+        Image: !Sub >-
+          177340731096.dkr.ecr.us-east-1.${AWS::URLSuffix}/cdk-hnb659fds-container-assets-177340731096-us-east-1:4e2150e8966f7d990bc0b63a98ede3410b3059295a5fd4d3a0d50480581410f1
+        ImagePullCredentialsType: SERVICE_ROLE
+        PrivilegedMode: false
+        Type: LINUX_CONTAINER
+      ServiceRole: !GetAtt 
+        - deploytoeksuswest2Role33F1F116
+        - Arn
+      Source:
+        BuildSpec: !Join 
+          - ''
+          - - |-
+              {
+                "version": "0.2",
+                "phases": {
+                  "install": {
+                    "commands": [
+                      "env",
+                      "export TAG=${CODEBUILD_RESOLVED_SOURCE_VERSION}",
+                      "/usr/local/bin/entrypoint.sh"
+                    ]
+                  },
+                  "build": {
+                    "commands": [
+                      "CREDENTIALS=$(aws sts assume-role --role-arn \"arn:
+            - !Ref 'AWS::Partition'
+            - >-
+              :iam::177340731096:role/clusterstack-us-west-2est2for2ndregiondd67da9a1c1382be101f\"
+              --role-session-name codebuild-cdk)",
+                      "export AWS_ACCESS_KEY_ID=\"$(echo ${CREDENTIALS} | jq -r '.Credentials.AccessKeyId')\"",
+                      "export AWS_SECRET_ACCESS_KEY=\"$(echo ${CREDENTIALS} | jq -r '.Credentials.SecretAccessKey')\"",
+                      "export AWS_SESSION_TOKEN=\"$(echo ${CREDENTIALS} | jq -r '.Credentials.SessionToken')\"",
+                      "export AWS_EXPIRATION=$(echo ${CREDENTIALS} | jq -r '.Credentials.Expiration')",
+                      "sed -i 's@CONTAINER_IMAGE@'\"$ECR_REPO_URI:$TAG\"'@' app-deployment.yaml",
+                      "kubectl apply -f app-deployment.yaml"
+                    ]
+                  }
+                }
+              }
+        Type: CODEPIPELINE
+      Cache:
+        Type: NO_CACHE
+      EncryptionKey: !GetAtt 
+        - multiregioneksdepArtifactsBucketEncryptionKey2FC124C7
+        - Arn
+    Metadata:
+      'aws:cdk:path': CicdStack/deploy-to-eks-us-west-2/Resource
+  multiregioneksdepArtifactsBucketEncryptionKey2FC124C7:
+    Type: 'AWS::KMS::Key'
+    Properties:
+      KeyPolicy:
+        Statement:
+          - Action: 'kms:*'
+            Effect: Allow
+            Principal:
+              AWS: !Join 
+                - ''
+                - - 'arn:'
+                  - !Ref 'AWS::Partition'
+                  - ':iam::177340731096:root'
+            Resource: '*'
+        Version: 2012-10-17
+    UpdateReplacePolicy: Delete
+    DeletionPolicy: Delete
+    Metadata:
+      'aws:cdk:path': CicdStack/multi-region-eks-dep/ArtifactsBucketEncryptionKey/Resource
+  multiregioneksdepArtifactsBucketEncryptionKeyAliasB1552BB6:
+    Type: 'AWS::KMS::Alias'
+    Properties:
+      AliasName: alias/codepipeline-cicdstackmultiregioneksdep59b96e20
+      TargetKeyId: !GetAtt 
+        - multiregioneksdepArtifactsBucketEncryptionKey2FC124C7
+        - Arn
+    UpdateReplacePolicy: Delete
+    DeletionPolicy: Delete
+    Metadata:
+      'aws:cdk:path': >-
+        CicdStack/multi-region-eks-dep/ArtifactsBucketEncryptionKeyAlias/Resource
+  multiregioneksdepArtifactsBucket1B9BA65D:
+    Type: 'AWS::S3::Bucket'
+    Properties:
+      BucketEncryption:
+        ServerSideEncryptionConfiguration:
+          - ServerSideEncryptionByDefault:
+              KMSMasterKeyID: !GetAtt 
+                - multiregioneksdepArtifactsBucketEncryptionKey2FC124C7
+                - Arn
+              SSEAlgorithm: 'aws:kms'
+      PublicAccessBlockConfiguration:
+        BlockPublicAcls: true
+        BlockPublicPolicy: true
+        IgnorePublicAcls: true
+        RestrictPublicBuckets: true
+    UpdateReplacePolicy: Retain
+    DeletionPolicy: Retain
+    Metadata:
+      'aws:cdk:path': CicdStack/multi-region-eks-dep/ArtifactsBucket/Resource
+  multiregioneksdepArtifactsBucketPolicyF7BCD267:
+    Type: 'AWS::S3::BucketPolicy'
+    Properties:
+      Bucket: !Ref multiregioneksdepArtifactsBucket1B9BA65D
+      PolicyDocument:
+        Statement:
+          - Action: 's3:*'
+            Condition:
+              Bool:
+                'aws:SecureTransport': 'false'
+            Effect: Deny
+            Principal:
+              AWS: '*'
+            Resource:
+              - !GetAtt 
+                - multiregioneksdepArtifactsBucket1B9BA65D
+                - Arn
+              - !Join 
+                - ''
+                - - !GetAtt 
+                    - multiregioneksdepArtifactsBucket1B9BA65D
+                    - Arn
+                  - /*
+        Version: 2012-10-17
+    Metadata:
+      'aws:cdk:path': CicdStack/multi-region-eks-dep/ArtifactsBucket/Policy/Resource
+  multiregioneksdepRoleA93C402F:
+    Type: 'AWS::IAM::Role'
+    Properties:
+      AssumeRolePolicyDocument:
+        Statement:
+          - Action: 'sts:AssumeRole'
+            Effect: Allow
+            Principal:
+              Service: codepipeline.amazonaws.com
+        Version: 2012-10-17
+    Metadata:
+      'aws:cdk:path': CicdStack/multi-region-eks-dep/Role/Resource
+  multiregioneksdepRoleDefaultPolicy59230519:
+    Type: 'AWS::IAM::Policy'
+    Properties:
+      PolicyDocument:
+        Statement:
+          - Action:
+              - 's3:GetObject*'
+              - 's3:GetBucket*'
+              - 's3:List*'
+              - 's3:DeleteObject*'
+              - 's3:PutObject'
+              - 's3:PutObjectLegalHold'
+              - 's3:PutObjectRetention'
+              - 's3:PutObjectTagging'
+              - 's3:PutObjectVersionTagging'
+              - 's3:Abort*'
+            Effect: Allow
+            Resource:
+              - !GetAtt 
+                - multiregioneksdepArtifactsBucket1B9BA65D
+                - Arn
+              - !Join 
+                - ''
+                - - !GetAtt 
+                    - multiregioneksdepArtifactsBucket1B9BA65D
+                    - Arn
+                  - /*
+          - Action:
+              - 'kms:Decrypt'
+              - 'kms:DescribeKey'
+              - 'kms:Encrypt'
+              - 'kms:ReEncrypt*'
+              - 'kms:GenerateDataKey*'
+            Effect: Allow
+            Resource: !GetAtt 
+              - multiregioneksdepArtifactsBucketEncryptionKey2FC124C7
+              - Arn
+          - Action: 'sts:AssumeRole'
+            Effect: Allow
+            Resource: !GetAtt 
+              - >-
+                multiregioneksdepSourceCatchSourcefromCodeCodePipelineActionRoleF0086A6E
+              - Arn
+          - Action: 'sts:AssumeRole'
+            Effect: Allow
+            Resource: !GetAtt 
+              - >-
+                multiregioneksdepBuildBuildAndPushtoECRCodePipelineActionRole72694A63
+              - Arn
+          - Action: 'sts:AssumeRole'
+            Effect: Allow
+            Resource: !GetAtt 
+              - >-
+                multiregioneksdepDeployToMainEKSclusterCodePipelineActionRoleB4B3ADC2
+              - Arn
+          - Action: 'sts:AssumeRole'
+            Effect: Allow
+            Resource: !GetAtt 
+              - >-
+                multiregioneksdepApproveToDeployTo2ndRegionCodePipelineActionRole7856F77C
+              - Arn
+          - Action: 'sts:AssumeRole'
+            Effect: Allow
+            Resource: !GetAtt 
+              - >-
+                multiregioneksdepDeployTo2ndRegionClusterCodePipelineActionRole2BEBF55D
+              - Arn
+        Version: 2012-10-17
+      PolicyName: multiregioneksdepRoleDefaultPolicy59230519
+      Roles:
+        - !Ref multiregioneksdepRoleA93C402F
+    Metadata:
+      'aws:cdk:path': CicdStack/multi-region-eks-dep/Role/DefaultPolicy/Resource
+  multiregioneksdep891418B4:
+    Type: 'AWS::CodePipeline::Pipeline'
+    Properties:
+      RoleArn: !GetAtt 
+        - multiregioneksdepRoleA93C402F
+        - Arn
+      Stages:
+        - Actions:
+            - ActionTypeId:
+                Category: Source
+                Owner: AWS
+                Provider: CodeCommit
+                Version: '1'
+              Configuration:
+                RepositoryName: !GetAtt 
+                  - hellopyfordemogo02871D68
+                  - Name
+                BranchName: master
+                PollForSourceChanges: false
+              Name: CatchSourcefromCode
+              OutputArtifacts:
+                - Name: Artifact_Source_CatchSourcefromCode
+              RoleArn: !GetAtt 
+                - >-
+                  multiregioneksdepSourceCatchSourcefromCodeCodePipelineActionRoleF0086A6E
+                - Arn
+              RunOrder: 1
+          Name: Source
+        - Actions:
+            - ActionTypeId:
+                Category: Build
+                Owner: AWS
+                Provider: CodeBuild
+                Version: '1'
+              Configuration:
+                ProjectName: !Ref buildtoecr6773C6BF
+              InputArtifacts:
+                - Name: Artifact_Source_CatchSourcefromCode
+              Name: BuildAndPushtoECR
+              RoleArn: !GetAtt 
+                - >-
+                  multiregioneksdepBuildBuildAndPushtoECRCodePipelineActionRole72694A63
+                - Arn
+              RunOrder: 1
+          Name: Build
+        - Actions:
+            - ActionTypeId:
+                Category: Build
+                Owner: AWS
+                Provider: CodeBuild
+                Version: '1'
+              Configuration:
+                ProjectName: !Ref deploytoeksuseast1E9BA2EC6
+              InputArtifacts:
+                - Name: Artifact_Source_CatchSourcefromCode
+              Name: DeployToMainEKScluster
+              RoleArn: !GetAtt 
+                - >-
+                  multiregioneksdepDeployToMainEKSclusterCodePipelineActionRoleB4B3ADC2
+                - Arn
+              RunOrder: 1
+          Name: DeployToMainEKScluster
+        - Actions:
+            - ActionTypeId:
+                Category: Approval
+                Owner: AWS
+                Provider: Manual
+                Version: '1'
+              Name: ApproveToDeployTo2ndRegion
+              RoleArn: !GetAtt 
+                - >-
+                  multiregioneksdepApproveToDeployTo2ndRegionCodePipelineActionRole7856F77C
+                - Arn
+              RunOrder: 1
+          Name: ApproveToDeployTo2ndRegion
+        - Actions:
+            - ActionTypeId:
+                Category: Build
+                Owner: AWS
+                Provider: CodeBuild
+                Version: '1'
+              Configuration:
+                ProjectName: !Ref deploytoeksuswest2D926DC6C
+              InputArtifacts:
+                - Name: Artifact_Source_CatchSourcefromCode
+              Name: DeployTo2ndRegionCluster
+              RoleArn: !GetAtt 
+                - >-
+                  multiregioneksdepDeployTo2ndRegionClusterCodePipelineActionRole2BEBF55D
+                - Arn
+              RunOrder: 1
+          Name: DeployTo2ndRegionCluster
+      ArtifactStore:
+        EncryptionKey:
+          Id: !GetAtt 
+            - multiregioneksdepArtifactsBucketEncryptionKey2FC124C7
+            - Arn
+          Type: KMS
+        Location: !Ref multiregioneksdepArtifactsBucket1B9BA65D
+        Type: S3
+    DependsOn:
+      - multiregioneksdepRoleDefaultPolicy59230519
+      - multiregioneksdepRoleA93C402F
+    Metadata:
+      'aws:cdk:path': CicdStack/multi-region-eks-dep/Resource
+  multiregioneksdepSourceCatchSourcefromCodeCodePipelineActionRoleF0086A6E:
+    Type: 'AWS::IAM::Role'
+    Properties:
+      AssumeRolePolicyDocument:
+        Statement:
+          - Action: 'sts:AssumeRole'
+            Effect: Allow
+            Principal:
+              AWS: !Join 
+                - ''
+                - - 'arn:'
+                  - !Ref 'AWS::Partition'
+                  - ':iam::177340731096:root'
+        Version: 2012-10-17
+    Metadata:
+      'aws:cdk:path': >-
+        CicdStack/multi-region-eks-dep/Source/CatchSourcefromCode/CodePipelineActionRole/Resource
+  multiregioneksdepSourceCatchSourcefromCodeCodePipelineActionRoleDefaultPolicy5125A76A:
+    Type: 'AWS::IAM::Policy'
+    Properties:
+      PolicyDocument:
+        Statement:
+          - Action:
+              - 's3:GetObject*'
+              - 's3:GetBucket*'
+              - 's3:List*'
+              - 's3:DeleteObject*'
+              - 's3:PutObject'
+              - 's3:PutObjectLegalHold'
+              - 's3:PutObjectRetention'
+              - 's3:PutObjectTagging'
+              - 's3:PutObjectVersionTagging'
+              - 's3:Abort*'
+            Effect: Allow
+            Resource:
+              - !GetAtt 
+                - multiregioneksdepArtifactsBucket1B9BA65D
+                - Arn
+              - !Join 
+                - ''
+                - - !GetAtt 
+                    - multiregioneksdepArtifactsBucket1B9BA65D
+                    - Arn
+                  - /*
+          - Action:
+              - 'kms:Decrypt'
+              - 'kms:DescribeKey'
+              - 'kms:Encrypt'
+              - 'kms:ReEncrypt*'
+              - 'kms:GenerateDataKey*'
+            Effect: Allow
+            Resource: !GetAtt 
+              - multiregioneksdepArtifactsBucketEncryptionKey2FC124C7
+              - Arn
+          - Action:
+              - 'codecommit:GetBranch'
+              - 'codecommit:GetCommit'
+              - 'codecommit:UploadArchive'
+              - 'codecommit:GetUploadArchiveStatus'
+              - 'codecommit:CancelUploadArchive'
+            Effect: Allow
+            Resource: !GetAtt 
+              - hellopyfordemogo02871D68
+              - Arn
+        Version: 2012-10-17
+      PolicyName: >-
+        multiregioneksdepSourceCatchSourcefromCodeCodePipelineActionRoleDefaultPolicy5125A76A
+      Roles:
+        - !Ref >-
+          multiregioneksdepSourceCatchSourcefromCodeCodePipelineActionRoleF0086A6E
+    Metadata:
+      'aws:cdk:path': >-
+        CicdStack/multi-region-eks-dep/Source/CatchSourcefromCode/CodePipelineActionRole/DefaultPolicy/Resource
+  multiregioneksdepEventsRole0EE00C5D:
+    Type: 'AWS::IAM::Role'
+    Properties:
+      AssumeRolePolicyDocument:
+        Statement:
+          - Action: 'sts:AssumeRole'
+            Effect: Allow
+            Principal:
+              Service: events.amazonaws.com
+        Version: 2012-10-17
+    Metadata:
+      'aws:cdk:path': CicdStack/multi-region-eks-dep/EventsRole/Resource
+  multiregioneksdepEventsRoleDefaultPolicyBC4E633A:
+    Type: 'AWS::IAM::Policy'
+    Properties:
+      PolicyDocument:
+        Statement:
+          - Action: 'codepipeline:StartPipelineExecution'
+            Effect: Allow
+            Resource: !Join 
+              - ''
+              - - 'arn:'
+                - !Ref 'AWS::Partition'
+                - ':codepipeline:us-east-1:177340731096:'
+                - !Ref multiregioneksdep891418B4
+        Version: 2012-10-17
+      PolicyName: multiregioneksdepEventsRoleDefaultPolicyBC4E633A
+      Roles:
+        - !Ref multiregioneksdepEventsRole0EE00C5D
+    Metadata:
+      'aws:cdk:path': CicdStack/multi-region-eks-dep/EventsRole/DefaultPolicy/Resource
+  multiregioneksdepBuildBuildAndPushtoECRCodePipelineActionRole72694A63:
+    Type: 'AWS::IAM::Role'
+    Properties:
+      AssumeRolePolicyDocument:
+        Statement:
+          - Action: 'sts:AssumeRole'
+            Effect: Allow
+            Principal:
+              AWS: !Join 
+                - ''
+                - - 'arn:'
+                  - !Ref 'AWS::Partition'
+                  - ':iam::177340731096:root'
+        Version: 2012-10-17
+    Metadata:
+      'aws:cdk:path': >-
+        CicdStack/multi-region-eks-dep/Build/BuildAndPushtoECR/CodePipelineActionRole/Resource
+  multiregioneksdepBuildBuildAndPushtoECRCodePipelineActionRoleDefaultPolicyE2504497:
+    Type: 'AWS::IAM::Policy'
+    Properties:
+      PolicyDocument:
+        Statement:
+          - Action:
+              - 'codebuild:BatchGetBuilds'
+              - 'codebuild:StartBuild'
+              - 'codebuild:StopBuild'
+            Effect: Allow
+            Resource: !GetAtt 
+              - buildtoecr6773C6BF
+              - Arn
+        Version: 2012-10-17
+      PolicyName: >-
+        multiregioneksdepBuildBuildAndPushtoECRCodePipelineActionRoleDefaultPolicyE2504497
+      Roles:
+        - !Ref multiregioneksdepBuildBuildAndPushtoECRCodePipelineActionRole72694A63
+    Metadata:
+      'aws:cdk:path': >-
+        CicdStack/multi-region-eks-dep/Build/BuildAndPushtoECR/CodePipelineActionRole/DefaultPolicy/Resource
+  multiregioneksdepDeployToMainEKSclusterCodePipelineActionRoleB4B3ADC2:
+    Type: 'AWS::IAM::Role'
+    Properties:
+      AssumeRolePolicyDocument:
+        Statement:
+          - Action: 'sts:AssumeRole'
+            Effect: Allow
+            Principal:
+              AWS: !Join 
+                - ''
+                - - 'arn:'
+                  - !Ref 'AWS::Partition'
+                  - ':iam::177340731096:root'
+        Version: 2012-10-17
+    Metadata:
+      'aws:cdk:path': >-
+        CicdStack/multi-region-eks-dep/DeployToMainEKScluster/DeployToMainEKScluster/CodePipelineActionRole/Resource
+  multiregioneksdepDeployToMainEKSclusterCodePipelineActionRoleDefaultPolicyA330A143:
+    Type: 'AWS::IAM::Policy'
+    Properties:
+      PolicyDocument:
+        Statement:
+          - Action:
+              - 'codebuild:BatchGetBuilds'
+              - 'codebuild:StartBuild'
+              - 'codebuild:StopBuild'
+            Effect: Allow
+            Resource: !GetAtt 
+              - deploytoeksuseast1E9BA2EC6
+              - Arn
+        Version: 2012-10-17
+      PolicyName: >-
+        multiregioneksdepDeployToMainEKSclusterCodePipelineActionRoleDefaultPolicyA330A143
+      Roles:
+        - !Ref multiregioneksdepDeployToMainEKSclusterCodePipelineActionRoleB4B3ADC2
+    Metadata:
+      'aws:cdk:path': >-
+        CicdStack/multi-region-eks-dep/DeployToMainEKScluster/DeployToMainEKScluster/CodePipelineActionRole/DefaultPolicy/Resource
+  multiregioneksdepApproveToDeployTo2ndRegionCodePipelineActionRole7856F77C:
+    Type: 'AWS::IAM::Role'
+    Properties:
+      AssumeRolePolicyDocument:
+        Statement:
+          - Action: 'sts:AssumeRole'
+            Effect: Allow
+            Principal:
+              AWS: !Join 
+                - ''
+                - - 'arn:'
+                  - !Ref 'AWS::Partition'
+                  - ':iam::177340731096:root'
+        Version: 2012-10-17
+    Metadata:
+      'aws:cdk:path': >-
+        CicdStack/multi-region-eks-dep/ApproveToDeployTo2ndRegion/ApproveToDeployTo2ndRegion/CodePipelineActionRole/Resource
+  multiregioneksdepDeployTo2ndRegionClusterCodePipelineActionRole2BEBF55D:
+    Type: 'AWS::IAM::Role'
+    Properties:
+      AssumeRolePolicyDocument:
+        Statement:
+          - Action: 'sts:AssumeRole'
+            Effect: Allow
+            Principal:
+              AWS: !Join 
+                - ''
+                - - 'arn:'
+                  - !Ref 'AWS::Partition'
+                  - ':iam::177340731096:root'
+        Version: 2012-10-17
+    Metadata:
+      'aws:cdk:path': >-
+        CicdStack/multi-region-eks-dep/DeployTo2ndRegionCluster/DeployTo2ndRegionCluster/CodePipelineActionRole/Resource
+  multiregioneksdepDeployTo2ndRegionClusterCodePipelineActionRoleDefaultPolicy8FA90126:
+    Type: 'AWS::IAM::Policy'
+    Properties:
+      PolicyDocument:
+        Statement:
+          - Action:
+              - 'codebuild:BatchGetBuilds'
+              - 'codebuild:StartBuild'
+              - 'codebuild:StopBuild'
+            Effect: Allow
+            Resource: !GetAtt 
+              - deploytoeksuswest2D926DC6C
+              - Arn
+        Version: 2012-10-17
+      PolicyName: >-
+        multiregioneksdepDeployTo2ndRegionClusterCodePipelineActionRoleDefaultPolicy8FA90126
+      Roles:
+        - !Ref >-
+          multiregioneksdepDeployTo2ndRegionClusterCodePipelineActionRole2BEBF55D
+    Metadata:
+      'aws:cdk:path': >-
+        CicdStack/multi-region-eks-dep/DeployTo2ndRegionCluster/DeployTo2ndRegionCluster/CodePipelineActionRole/DefaultPolicy/Resource
+  CDKMetadata:
+    Type: 'AWS::CDK::Metadata'
+    Properties:
+      Analytics: >-
+        v2:deflate64:H4sIAAAAAAAA/3VQy07DMBD8lt4dAy0SXFu4IA5E5QMq11miTfyIvHYRivzvrJ1I4cJpZte7M+Pdy8Oj3O/UNzW6GxuDVzl/RqVHwa3LrH0H2luLUc5nmDxh9OFHvHy5rcoCbuAi8UQyUN8YuavD/0tioydFPF2crglNJ+cWJzDooA1+AB3L4kqzQGVZ1K8+BVtvUFf1hVXjiyICjvTq9QjhzaoejqVTbaZVf3Oq2yvPYrT8l3eomgWOBhWVopIs6CDnU2LhGm1lC2xh/tY5l85HilOKoubgE/fo+uUm5FPQ7Os4mxzo7vbwLJ/k/W4gxCYkF9GCPC/4CxDj2rKwAQAA
+    Metadata:
+      'aws:cdk:path': CicdStack/CDKMetadata/Default
+Outputs:
+  codecommituri:
+    Value: !GetAtt 
+      - hellopyfordemogo02871D68
+      - CloneUrlHttp
+    Export:
+      Name: CodeCommitURL
+Parameters:
+  BootstrapVersion:
+    Type: 'AWS::SSM::Parameter::Value<String>'
+    Default: /cdk-bootstrap/hnb659fds/version
+    Description: >-
+      Version of the CDK Bootstrap resources in this environment, automatically
+      retrieved from SSM Parameter Store. [cdk:skip]
+Rules:
+  CheckBootstrapVersion:
+    Assertions:
+      - Assert: !Not 
+          - 'Fn::Contains':
+              - - '1'
+                - '2'
+                - '3'
+                - '4'
+                - '5'
+              - !Ref BootstrapVersion
+        AssertDescription: >-
+          CDK bootstrap stack version 6 required. Please run 'cdk bootstrap'
+          with a recent version of the CDK CLI.

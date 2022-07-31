@@ -8,10 +8,10 @@ import { CicdStack } from '../lib/cicd-stack';
 const app = new cdk.App();
 
 const account = app.node.tryGetContext('account') || process.env.CDK_INTEG_ACCOUNT || process.env.CDK_DEFAULT_ACCOUNT;
-const primaryRegion = {account: account, region: 'us-east-2'};
-const secondaryRegion = {account: account, region: 'eu-west-2'};
-const primaryOnDemandInstanceType = 'r5.2xlarge';
-const secondaryOnDemandInstanceType = 'm5.2xlarge';
+const primaryRegion = {account: account, region: 'us-east-1'};
+const secondaryRegion = {account: account, region: 'us-west-2'};
+const primaryOnDemandInstanceType = 't3.medium';
+const secondaryOnDemandInstanceType = 't3.medium';
 
 const primaryCluster = new ClusterStack(app, `ClusterStack-${primaryRegion.region}`, {env: primaryRegion, 
     onDemandInstanceType: primaryOnDemandInstanceType,
